@@ -152,6 +152,7 @@ class Backup {
         const ALWAYS_INCLUDE = [
             "world_behavior_packs.json",
             "world_resource_packs.json",
+            "level.dat",
             "behavior_packs/",
             "resource_packs/"
         ]
@@ -344,12 +345,14 @@ class Backup {
         // 一番近いFULL
         const startIndex = list.map(v => v.full).lastIndexOf(true);
 
+
         if (startIndex === -1) {
             throw new Error("FULL backup not found");
         }
 
-
         const applyList = list.slice(startIndex);
+
+        console.log(chalk.bgGreen(`Start:${applyList[0].fullpath} to End:${applyList[applyList.length-1].fullpathja}`))
 
         const restorePath = path.join(this.BDS, "worlds", this.worldname);
 

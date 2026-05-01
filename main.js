@@ -832,15 +832,13 @@ async function getBackupCache() {
 // Discordイベント
 client.on(discord.Events.InteractionCreate,async (interaction)=>{
   const { channel } = interaction
-  // 対象チャンネル以外ならスキップ
-  if(!config.Discord.guildId == channel.guildId) return
+  // 対象サーバー以外ならスキップ
+  if(config.Discord.guildId !== channel.guildId) return
   // AutoCompleteの設定
   if (interaction.isAutocomplete()) {
-    // Backupじゃないなら戻す
-    if (!interaction.commandName == "backup") return
     const focused = interaction.options.getFocused();
     const cachelist = await getBackupCache()
-    let blist = cachelist.sort((a,b)=>b.value - a.value)
+    let blist = [...cachelist].sort((a,b)=>Number(b.value) - Number(a.value))
     if (focused) {
       blist = blist.filter((v)=>`${v.value}`.startsWith(focused))
     }

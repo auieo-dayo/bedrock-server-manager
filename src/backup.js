@@ -77,6 +77,10 @@ async function walkDir(dir, relativePath = "") {
 
     return result;
 }
+async function sleep(n) {
+    return new Promise((resolve)=>setTimeout(resolve,n))
+}
+
 
 class Backup {
     constructor(root,BDS_path,backup_path,worldname) {
@@ -91,6 +95,9 @@ class Backup {
         }
 
         this.lastBackup = 0
+
+        this.isbackuping = false
+        this.isrestoring = false
     }
     
     waitForPreparationsComplete(bds) {
@@ -133,16 +140,22 @@ class Backup {
             bds.on("line", onLine)
         })
     }
+    async waitForBackupEnd() {
+        while (this.isbackuping) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        return
+    }
     async backup(list,isfull=false,notskip=false,PlayerStore,bds) {
         if (!config.backup.enabled) return bds.sendCommand("save resume")
-        if (!list && !isfull) return bds.sendCommand("save resume")
-
+        if (!list && !isfull) return bds.sendCommand("save resume")        
         const elapsed = Date.now() - this.lastBackup;
         const intervalMs = config.backup.interval * 60 * 1000;
         if (!notskip && (typeof PlayerStore.getAll()[0] == "undefined" && config.backup.pauseIfNoPlayer)) return bds.sendCommand("save resume");
         if (!notskip && elapsed < intervalMs) return bds.sendCommand("save resume")
 
         this.emit("start",isfull)
+        this.isbackuping = true
 
         const files = list.split(", ").map(v => {
             const [file, size] = v.split(":");
@@ -220,6 +233,7 @@ class Backup {
         if (copyCount === 0) await fs.remove(fullpath);
         this.lastBackup = Date.now()
         this.emit("stop")
+        this.isbackuping = false
         if (bds) bds.sendCommand("save resume",true);
         }
     async getlist(source, returnfullbackup = false) {
@@ -317,6 +331,8 @@ class Backup {
     }
 
     async restore(target) {
+        await this.waitForBackupEnd()
+        if (this.isrestoring) return
         const backups = (await this.getlist("",true)).data
 
         const date = new Date(target)
@@ -325,6 +341,7 @@ class Backup {
         const datetext = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} - ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
         console.log(chalk.bgGreen(`Target:${datetext}`))
         this.emit("restoreStart",date)
+        this.isrestoring = true
 
         // Fullからtargetまでのバックアップを取る
         const list = backups.fullbackuplist
@@ -357,7 +374,10 @@ class Backup {
         const restorePath = path.join(this.BDS, "worlds", this.worldname);
 
         // 一旦消す
-        await fs.remove(restorePath);
+        await fs.remove(restorePath,(err)=>{
+            console.error("[Restore -Error] "+ err.stack)
+        });
+
         await fs.ensureDir(restorePath);
 
         for (const backup of applyList) {
@@ -374,6 +394,7 @@ class Backup {
         }
         console.log(chalk.bgGreen(`Completed Restore from Backups`))
         this.emit("restoreEnd",date)
+        this.isrestoring = false
     }
     /**
      * 

@@ -77,9 +77,6 @@ async function walkDir(dir, relativePath = "") {
 
     return result;
 }
-async function sleep(n) {
-    return new Promise((resolve)=>setTimeout(resolve,n))
-}
 
 
 class Backup {
@@ -91,7 +88,9 @@ class Backup {
 
         this._events = {
             start: [],
-            stop: []
+            stop: [],
+            restoreStart: [],
+            restoreEnd: []
         }
 
         this.lastBackup = 0
@@ -374,9 +373,11 @@ class Backup {
         const restorePath = path.join(this.BDS, "worlds", this.worldname);
 
         // 一旦消す
-        await fs.remove(restorePath,(err)=>{
-            console.error("[Restore -Error] "+ err.stack)
-        });
+        try {
+            await fs.remove(restorePath);
+        } catch (err) {
+            console.error("[Restore -Error] ", err && err.stack ? err.stack : err);
+        }
 
         await fs.ensureDir(restorePath);
 

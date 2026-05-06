@@ -18,7 +18,6 @@ BSW は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールで�
 - .env: [docs/env.md](docs/env.md)
 - API: [docs/API.md](docs/API.md)
 - WebSocket: [docs/Websocket.md](docs/Websocket.md)
-- プラグイン開発: [docs/Plugins.md](docs/Plugins.md)
 
 ## 必要条件
 - Node.js 18 以上
@@ -52,15 +51,5 @@ npm start
 
 デフォルトでは WebUI は `config.js` の `webUi.port`（デフォルト 3000）で起動します。
 
-## プラグイン
-プラグインは `plugins/` フォルダに配置します。例は `plugins/sample.js` を参照してください。
-
-プラグインの基本:
-- `enable: true|false`
-- `name: "pluginName"`
-- `onLoad(api)` があればロード時に呼ばれます
-- `plugin[event](data)` のようにログイベントを受け取れます（例: `PlayerJoin`, `chat` など）
-
-詳細は [docs/Plugins.md](docs/Plugins.md) を参照してください。
 
 > このプロジェクトでは、デフォルトのWebダッシュボードに Yusei Magic フォント（SIL Open Font License 1.1）を使用しています。

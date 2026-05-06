@@ -3,13 +3,17 @@ const { spawn } = require("child_process");
 const readline = require("readline");
 const config = require("../config/config");
 const WebSocket = require("ws");
+const { Logger } = require("./logger");
 
 
 class BDS {
+    /**
+     * 
+     * @param {Logger} logger 
+     */
+    constructor(BDS_path,BDS_file,logger,wss) {
 
-    constructor(BDS_path,BDS_file,logmng,wss) {
-
-        this.logmng = logmng
+        this.logger = logger
         this.wss = wss
         this._events = {
             spawn: [],
@@ -81,7 +85,7 @@ class BDS {
             }
             
             if (res?.skip) return
-            this.logmng.add({"type":"BDS","data":line,"time":Date.now()})
+            this.logger.BDS(line)
             console.log(`${line}`);
             // Websocket Broadcast
             this.WSbroadcast({"type":"BDS","data":line})
@@ -133,7 +137,7 @@ class BDS {
         if (!hidden) {
             console.log(`${chalk.green(cmd)}\n`)
             this.WSbroadcast({"type":"cmd","data":cmd})
-            this.logmng.add({"type":"cmd","data":cmd,"time":Date.now()})
+            this.logger.Cmd(cmd)
         }
         //BDS Input
         this.bds.stdin.write(`${cmd}\n`);

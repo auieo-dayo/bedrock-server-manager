@@ -146,12 +146,13 @@ class Backup {
         return
     }
     async backup(list,isfull=false,notskip=false,PlayerStore,bds) {
-        if (!config.backup.enabled) return bds.sendCommand("save resume")
-        if (!list && !isfull) return bds.sendCommand("save resume")        
+        if (this.isrestoring) return bds.sendCommand("save resume",true)
+        if (!config.backup.enabled) return bds.sendCommand("save resume",true)
+        if (!list && !isfull) return bds.sendCommand("save resume",true)
         const elapsed = Date.now() - this.lastBackup;
         const intervalMs = config.backup.interval * 60 * 1000;
-        if (!notskip && (typeof PlayerStore.getAll()[0] == "undefined" && config.backup.pauseIfNoPlayer)) return bds.sendCommand("save resume");
-        if (!notskip && elapsed < intervalMs) return bds.sendCommand("save resume")
+        if (!notskip && (typeof PlayerStore.getAll()[0] == "undefined" && config.backup.pauseIfNoPlayer)) return bds.sendCommand("save resume",true);
+        if (!notskip && elapsed < intervalMs) return bds.sendCommand("save resume",true)
 
         this.emit("start",isfull)
         this.isbackuping = true

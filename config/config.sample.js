@@ -82,40 +82,6 @@ const config = {
         "password":"admin",
         // リバースプロキシを信頼するか(boolean | number)
         "trustProxy": false
-    },
-    // 退出時に座標を自動で保存
-    "lastLocationLog": {
-        // 座標を自動で保存するかどうか
-        "enabled": false,
-        // CouchDBの設定
-        "CouchDB": {
-            // ベースのDBのURL
-            "baseurl": "https://example.com",
-            // DBの名前
-            "dbname": "lastlocation",
-            // DBの管理者ユーザーの設定
-            "user": {
-                "name": "admin",
-                "pass": "admin"
-            }
-        }
-    },
-    // 死亡時に座標ログを保存
-    "deathLocationLog": {
-        // 座標を自動で保存するかどうか
-        "enabled": false,
-        // CouchDBの設定
-        "CouchDB": {
-            // ベースのDBのURL
-            "baseurl": "https://example.com",
-            // DBの名前
-            "dbname": "deathlocation",
-            // DBの管理者ユーザーの設定
-            "user": {
-                "name": "admin",
-                "pass": "admin"
-            }
-        }
     }
 }
 module.exports = config

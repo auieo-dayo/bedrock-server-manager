@@ -5,6 +5,12 @@ import { SecretString, transferPlayer } from "@minecraft/server-admin";
 import * as net from "@minecraft/server-net"
 let port = NaN
 
+const dim = {
+    "minecraft:overworld": "OverWorld",
+    "minecraft:nether":"Nether",
+    "minecraft:the_end":"TheEnd"
+}
+
 function btoa(str) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let result = "";
@@ -71,7 +77,7 @@ function post(body) {
 
 world.beforeEvents.playerLeave.subscribe((ev)=>{
     const player = ev.player
-    console.log(JSON.stringify({"type":"Logger","cmd":"playerLeave","source":`${player.name}(${player.location.x} ${player.location.y} ${player.location.z})`,"data":"","isEntity":true}))
+    console.log(JSON.stringify({"type":"Logger","cmd":"playerLeave","source":`${player.name}(${player.location.x} ${player.location.y} ${player.location.z})`,"data":`${dim[player.dimension.id]}`,"isEntity":true}))
 })
 
 // チャットを送信
@@ -113,10 +119,31 @@ world.afterEvents.entityDie.subscribe((ev)=>{
         }
     }
     const location = die.location
-    const body = {"type":"death","source":`${die.name}`,"reason":`${cause}(${info})`,location}
+
+    const body = {"type":"death","source":`${die.name}`,"reason":`${cause}(${info})`,location,dim:dim[die.dimension.id]}
     post(body)
 })
+world.afterEvents.playerPlaceBlock.subscribe((ev)=>{
+    post({
+        type:"blockEvent",
+        action:0,
+        typeid: ev.block.typeId,
+        dim: dim[ev.dimension.id],
+        player: ev.player.name,
+        location: ev.block.location
+    })
+})
 
+world.beforeEvents.playerBreakBlock.subscribe((ev)=>{
+    post({
+        type:"blockEvent",
+        action:1,
+        typeid: ev.block.typeId,
+        dim: dim[ev.dimension.id],
+        player: ev.player.name,
+        location: ev.block.location
+    })
+})
 // あ
 
 system.runInterval(()=>{

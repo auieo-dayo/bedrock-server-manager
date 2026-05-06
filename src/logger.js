@@ -3,10 +3,10 @@ const Database = require("better-sqlite3")
 const Types = {
     events: {
         BDS:0,
-        Chat:1,
-        Server:2,
-        Death:3,
-        Cmd:4,
+        chat:1,
+        server:2,
+        death:3,
+        cmd:4,
         PlayerJoin:5,
         PlayerLeave:6
     },
@@ -32,7 +32,7 @@ class Logger {
         
         // イベント
         // metadataにはJSON
-        // typeの0:BDS、1:Chat、2:Server、3:Death,4:Cmd,5:PlayerJoin,6:PlayerLeave
+        // typeの0:BDS、1:chat、2:server、3:death,4:cmd,5:PlayerJoin,6:PlayerLeave
         this.db.exec(`CREATE TABLE IF NOT EXISTS events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             time INTEGER NOT NULL,
@@ -85,7 +85,7 @@ class Logger {
         if (typeof isdiscord !== "boolean") throw new Error(`${isdiscord} is not string(isdiscord)`)
         const prefix = isdiscord ? "[D]" :""
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.Chat,player,`${prefix}${player}:${message}`,JSON.stringify({isdiscord,player,message}))
+        prepare.run(Date.now(),Types.events.chat,player,`${prefix}${player}:${message}`,JSON.stringify({isdiscord,message}))
     }
     /**
      * @param {string} line 
@@ -97,11 +97,15 @@ class Logger {
     }
     /**
      * @param {string} data 
+     * @param {boolean | undefined} isstartuptext
      */
-    Server(data) {
+    Server(data,isstartuptext) {
         if (typeof data !== "string") throw new Error(`${data} is not string(data)`)
+        let metadata = null
+        if (isstartuptext) metadata = {isStartUp:true}
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.Server,null,data,null)
+        prepare.run(Date.now(),Types.events.server,null,data,JSON.stringify(metadata))
+        
     }
     /**
      * @param {string} player 
@@ -115,7 +119,7 @@ class Logger {
         if (typeof reason !== "string") throw new Error(`${reason} is not string(reason)`)
         if(typeof Types.dimension[dimension] !== "number") throw new Error(`[${dimension}] Validation error(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.Death,player,`${player}(${reason})`,JSON.stringify({player,reason,location,dimension}))
+        prepare.run(Date.now(),Types.events.death,player,`${player}(${reason})`,JSON.stringify({reason,location,dimension}))
     }
     /**
      * @param {string} data 
@@ -123,7 +127,7 @@ class Logger {
     Cmd(data) {
         if (typeof data !== "string") throw new Error(`[${data}] Validation error(data)`) 
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.Cmd,null,data,null)     
+        prepare.run(Date.now(),Types.events.cmd,null,data,null)     
     }
     /**
      * @param {string} player 
@@ -131,15 +135,17 @@ class Logger {
     PlayerJoin(player) {
         if (typeof player !== "string") throw new Error(`${player} is not string(player)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.PlayerJoin,null,player,null)          
+        prepare.run(Date.now(),Types.events.PlayerJoin,player,null,null)          
     }
     /**
      * @param {string} player 
-     */
-    PlayerLeave(player) {
+     * @param {"OverWorld"|"Nether"|"TheEnd"} dimension 
+     * @param {{x:number,y:number,z:number}} location  
+    */
+    PlayerLeave(player,location,dimension) {
         if (typeof player !== "string") throw new Error(`${player} is not string(player)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.PlayerLeave,null,player,null)  
+        prepare.run(Date.now(),Types.events.PlayerLeave,player,null,JSON.stringify({location,dimension}))  
     }
 
     // blockevents
@@ -171,6 +177,7 @@ class Logger {
         const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`)
         prepare.run(Date.now(),Types.blockevents.actiontype.BreakBlock,player,typeid,Types.dimension[dimension],location.x,location.y,location.z)  
     }
+
 }
 
 module.exports = {Logger,Types}

@@ -17,23 +17,12 @@ const config = require('./config/config');
 const playerstore = require("./src/playerList")
 const BanManager = require("./src/ban")
 const discordCommands = require('./src/discord/commands');
-const CouchManager = require("./src/couch");
 const { setCommands } = require("./src/discord/setGuildCommands")
 const {formatDate,msToYMDHMS} = require("./src/formatDate")
 const BDS = require("./src/BDS")
 const Backup = require("./src/backup")
+const Logger = require("./src/logger")
 
-/**
-  * @type {{lll:CouchManager | null,dll:CouchManager | null}}
- */
-const Couch = {
-  lll: null,
-  dll: null
-}
-// lastlocationlog
-if (config.lastLocationLog.enabled) Couch.lll = new CouchManager(config.lastLocationLog.CouchDB.baseurl,config.lastLocationLog.CouchDB.dbname,config.lastLocationLog.CouchDB.user);
-// deathlocationlog
-if (config.deathLocationLog.enabled) Couch.dll = new CouchManager(config.deathLocationLog.CouchDB.baseurl,config.deathLocationLog.CouchDB.dbname,config.deathLocationLog.CouchDB.user); 
 
 
 // project-root
@@ -59,72 +48,19 @@ const BDS_file =
     : path.join(BDS_path, "bedrock_server")
 
 
-// Log path
-
-const BSWStart = new Date()
-const pad = (n) => n.toString().padStart(2, '0');
-
-const logPath = {
-  "folder": path.join(root,"log"),
-  "file": ()=>{
-    const now = new Date()
-    return `${BSWStart.getTime()}_${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}.jsonl`
-  }
-}
-fs.ensureDirSync(logPath.folder)
-
 let worldname = process.env["level-name"]
 let servername = process.env["server-name"]
 
 // time
 
+const dbpath = path.join(__dirname,"datas","app.db")
+fs.ensureDirSync(path.dirname(dbpath))
+const logm = new Logger.Logger(dbpath)
 
-
-
-
-// Plugin
-
-const PluginManager = require("./src/pluginManager")
-
-const apis = {
-  sendChat : {
-    mc: (msg)=>{apis.sendCommand(`tellraw @a ${JSON.stringify({"rawtext":[{"text":msg}]})}`,true)},
-    discord: async (msg)=>{
-      if (!config.Discord.notifications.chat.enabled) return
-      await sendLongMessage(channels.chat,msg)
-    },
-    send: async (msg)=>{
-      apis.sendChat.mc(msg)
-      await apis.sendChat.discord(msg)
-    }
-  },
-  getPlayerList(){return onlinePlayer.getAll() ?? []},
-  getBackupList(getAllBackupList=false){
-    const blist = backup.getlist("",getAllBackupList)
-    return blist?.data ?? []   
-  },
-  sendCommand(cmd,ishidden=false){bds.sendCommand(cmd,ishidden)}
-}
-
-
-const pm = new PluginManager(apis)
-
-// logMNG
-const logmng = {
-  "add": (json = {type:"",data:"",datatype:"",time:NaN}) => {
-    try {
-      if (!json.type || !json.data || !json.time) return;
-      pm.emit(json.type,json)
-      const filepath = path.join(logPath.folder, logPath.file());
-      fs.appendFile(filepath, JSON.stringify(json)+"\n");
-    } catch (err) {
-      console.log(`LogMNG[Error]:${err.message}`)
-    }
-  }
-}
+const BSWVer = require("./package.json").version
 // StartupText
-console.log(chalk.bgBlue(`BSW By auieo-dayo\nVersion:${require("./package.json").version}`))
-logmng.add({"type":"server","datatype":"str","data":`BSW by auieo-dayo | Ver:${require("./package.json").version}`,"time":Date.now()})
+console.log(chalk.bgBlue(`BSW By auieo-dayo\nVersion:${BSWVer}`))
+logm.Server(`BSW by auieo-dayo | Ver:${BSWVer}`,true)
 
 // BDS Check
 if (!fs.pathExistsSync(BDS_file)) {
@@ -132,9 +68,6 @@ if (!fs.pathExistsSync(BDS_file)) {
   process.exit(1)
 }
 
-
-// PluginLoad
-pm.loadPlugins()
 
 
 
@@ -146,15 +79,15 @@ const properties = PropertiesReader(properties_path);
 // BDS properties edit
 
 const env_list = [
-"server-name",
-"gamemode",
-"difficulty",
-"allow-cheats",
-"max-players",
-"server-port",
-"server-portv6",
-"level-seed",
-"level-name"
+  "server-name",
+  "gamemode",
+  "difficulty",
+  "allow-cheats",
+  "max-players",
+  "server-port",
+  "server-portv6",
+  "level-seed",
+  "level-name"
 ]
 
 for (const item of env_list) {
@@ -249,23 +182,9 @@ app.post('/api/bds/send',async (req,res,next)=>{
         break;
       }
       case "death":{
-        const {source,reason,location} = body
+        const {source,reason,location,dim} = body
         DeathtoDis(source,reason)
-        logmng.add({"type":"death","player":source,"data":`${source}(${reason})`,"reason":`${reason}`,"location":location,"time":Date.now()})
-
-        // Couch
-        if (config.deathLocationLog.enabled) {
-          try {
-            const json = {playername:source,"data":`${source}(${reason})`,reason,location,"timestamp":Date.now(),worldname}
-            const res = await Couch.dll.post("/",json)
-            if (res.status < 200 || res.status >= 300) {
-              const errtext = `(${res.status})${res.data}`
-              console.error(`[NODE-ERR]${chalk.red(errtext)}`);
-          }
-          } catch(e) {
-            console.error(`[NODE-ERR]${chalk.red(e.message)}`);
-          }
-        }
+        logm.Death(source,reason,location,dim)
 
         res.status(200).type("json").send({"status":true})
         break;
@@ -303,6 +222,16 @@ app.post('/api/bds/send',async (req,res,next)=>{
         
         break;
       }
+      case "blockEvent": {
+        if (![0,1].includes(body.type)) res.status(400).type("json").send({"status":false});
+
+        const {typeid,dim,player,location,action} = body
+
+        if (action === 0) logm.PlaceBlock(player,typeid,dim,location)
+        if (action === 1) logm.BreakBlock(player,typeid,dim,location)
+        res.status(200).type("json").send({"status":true})
+        break;
+      }
       default:{
         res.status(400).type("json").send({"status":false})
         break;
@@ -314,21 +243,11 @@ app.post('/api/bds/send',async (req,res,next)=>{
   }
 })
 
-// app.post('/api/bds/pluginsend',async (req,res,next)=>{
-//   try {
-//     const body = req.body
-//     const {id,data} = body
-//     if (!id || !data) return res.sendStatus(400)
-//     pm.emit(`PLUGIN_EVENT_${id}`,data)
-//   } catch(err) {
-//     next(err)
-//   }
-// })
 
 // lateLimit
 const limit = rateLimit({
   windowMs: 60 * 1000, // 1分
-  max: 100, // 最大100リクエスト
+  max: 200, // 最大200リクエスト
   standardHeaders: true,
   legacyHeaders: false,
 });
@@ -363,15 +282,43 @@ app.get('/api/getbdspw', async (req, res, next) => {
 app.get('/api/getlog', async (req, res, next) => {
   try {
     const {limit = 300} = req.query
-    const content = await fs.readFile(path.join(logPath.folder,logPath.file()),{"encoding":"utf-8"})
+    if (typeof limit !== "number") limit=300
+    const prepare = logm.db.prepare(`SELECT * FROM events ORDER BY time DESC LIMIT ?`)
+    const content = prepare.all(Number(limit))
     
-    const json = content  
-      .trim()
-      .split("\n")
-      .slice(-limit)
-      .map(JSON.parse);
+    const types = Object.keys(Logger.Types.events)
 
-    res.type("json").send(JSON.stringify(json,null,2))
+    const logs = content.map((value)=>{
+      const type = types[value.type]
+
+      const metadata = value.metadata
+
+      const json = {
+        type,
+        data: value.message,
+        time: value.time
+      }
+      // BDSはデフォでいいからスキップ
+      if (type == "chat") {
+        json.player = value.player
+        json.message = metadata.message
+        json.source = metadata.isdiscord ? "Discord" : "Minecraft";
+      }
+      if (type == "PlayerJoin" || type == "PlayerLeave") {
+        json.data = value.player
+      }
+      // cmdもデフォ
+      if (type == "death") {
+        json.player = value.player
+        json.reason = metadata.reason
+        json.location = metadata.location,
+        json.dimension = metadata.dimension
+      }
+      // serverもスキップ
+      return json 
+    })
+    logs.sort((a,b)=>a.time - b.time)
+    res.type("json").send(JSON.stringify(logs,null,2))
   }catch (err) {
     next(err)
   }
@@ -607,17 +554,15 @@ async function PlayerinfotoDis(json) {
 
   if (iserr) {
     embed.setTitle(`[${playername}]が見つかりませんでした`)
-    if (config.lastLocationLog.enabled) {
-      const res = await Couch.lll.post("/_find",{ "selector": { "playername": `${playername}` }, "sort": [ { "timestamp": "desc" } ], "limit": 1 })
-      const logoutdata = res.data.docs[0]
-      if (logoutdata) {
-        const date = new Date(logoutdata.timestamp)
+      const res = logm.db.prepare(`SELECT * FROM events WHERE type = ${Logger.Types.events.PlayerLeave} AND player = ? ORDER BY time DESC LIMIT 1`).get(playername)
+      
+      if (res) {
+        const date = new Date(res.time)
         const dateja = `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}時${String(date.getMinutes()).padStart(2, "0")}分${String(date.getSeconds()).padStart(2, "0")}秒`
-        embed.setDescription(`[${playername}]の最終ログアウト情報\nログアウト場所:${logoutdata.location.x.toFixed(0)} ${logoutdata.location.y.toFixed(0)} ${logoutdata.location.z.toFixed(0)}\nログアウト時刻:${dateja}`)
+        embed.setDescription(`[${playername}]の最終ログアウト情報\nログアウト場所:${res.metadata.location.x.toFixed(0)} ${res.metadata.location.y.toFixed(0)} ${res.metadata.location.z.toFixed(0)}\nログアウト時刻:${dateja}`)
       }  else {
         embed.setDescription(`[${playername}]の最終ログアウト情報が見つかりませんでした。`)
       }
-    }
     
     embed.setColor(0xed0000)
   } else {
@@ -643,7 +588,7 @@ const chatmng = {
   "sendtoMC": async(name,message) => {
     if (config.console.chatLogToConsole) console.log(chalk.yellow(`[D]${name}:${message}`))
     const returnText = `§3[D]${name}§r:${message}`
-    logmng.add({"type":"chat","data":`[D]${name}:${message}`,"player":`${name}`,"message":`${message}`,"source":"Discord","time":Date.now()})
+    logm.Chat(name,true,message)
     WSbroadcast({ type: "chat", data: `[D]${name}:${message}`})
     const rawtext = {"rawtext":[{"text":`${returnText.replace(/\n/g,"\\n")}`}]}
     if (onlinePlayer.getAll().length != 0) bds.sendCommand(`tellraw @a ${JSON.stringify(rawtext)}`,true)
@@ -654,8 +599,7 @@ const chatmng = {
     const returnText = `\`${name}\`:${parseMessageFromMC(message)}`
 
     WSbroadcast({ type: "chat", data: `${name}:${message}`})
-    logmng.add({"type":"chat","data":`${name}:${message}`,"player":`${name}`,"message":`${message}`,"source":"Minecraft","time":Date.now()})
-
+    logm.Chat(name,false,message)
 
     if (!config.Discord.notifications.chat.enabled) return
     if (!client.isReady()) return
@@ -744,12 +688,12 @@ client.on(discord.Events.MessageCreate, message => {
           "playerinfo": {
             "enabled": config.Discord.notifications.toAdmin.playerInfo.enabled,
             "prefix": config.Discord.notifications.toAdmin.playerInfo.prefix,
-            "description": "簡単なプレイヤーの情報を取得します。(CouchDB推奨)"          
+            "description": "簡単なプレイヤーの情報を取得します。"          
           },
           "deathinfo": {
             "enabled": config.Discord.notifications.toAdmin.deathInfo.enabled,
             "prefix": config.Discord.notifications.toAdmin.deathInfo.prefix,
-            "description": "最新十件で死亡場所等を取得します(CouchDB必須)"
+            "description": "最新十件で死亡場所等を取得します"
           },
           "BAN": {
             "enabled": config.Discord.notifications.toAdmin.ban.enabled,
@@ -784,7 +728,7 @@ client.on(discord.Events.MessageCreate, message => {
         )
         if (prefix){ 
           const content = message.content.slice(prefix.length+1)
-          discordCommands.admin.d(content,message,channels.admin,Couch.dll)
+          discordCommands.admin.d(content,message,channels.admin,logm)
         }
       }
 
@@ -866,7 +810,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
   // DeathInfo
   if (commandName == "d" && config.Discord.notifications.toAdmin.deathInfo.enabled) {
     const gamertag = options.getString("gamertag")
-    await discordCommands.admin.d(gamertag,interaction,channel,Couch.dll)
+    await discordCommands.admin.d(gamertag,interaction,channel,logm)
   }
   // Backup系
   if (commandName === "backup") {
@@ -878,7 +822,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     }else if (sub == "restore") {
       const target = options.getString("target")
       await interaction.deferReply({content:`復元中...`})
-      discordCommands.admin.backup.restore(backup,target,interaction,bds,logmng)
+      discordCommands.admin.backup.restore(backup,target,interaction,bds)
     }else if (sub == "list") {
       const target = options.getString("target")
       await interaction.deferReply({content:`復元中...`})
@@ -923,24 +867,24 @@ backup.on("start",(isfull)=>{
   latestbackup.isfull = isfull
   latestbackup.time = Date.now()
   console.log(`Starting ${isfull ? "Full" : "Diff"} Backup...`)
-  logmng.add({type:"server",datatype:"str",data:`${isfull ? "Full" : "Diff"} Backup Start`,isfull,time:Date.now()})
+  logm.Server(`${isfull ? "Full" : "Diff"} Backup Start`)
 })
 
 backup.on("stop",()=>{
     const log = `BackupSuccessful(${latestbackup.isfull ? "FULL" : "diff"})(${((Date.now() - latestbackup.time)/1000).toFixed(2)} Seconds)`;
     if (config.console.backupLogToConsole) console.log(chalk.bgBlue(log));
-    logmng.add({type:"server",datatype:"str",data:`${log}`,isfull:latestbackup.isfull,time:Date.now()})
+    logm.Server(log)
 })
 
 // Restore
 
 backup.on("restoreStart",(date)=>{
   const datetext = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} - ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-  logmng.add({type:"server",datatype:"str",data:`Restore Start(Target:${datetext})`,time:Date.now()})
+  logm.Server(`Restore Start(Target:${datetext})`)
 })
 
 backup.on("restoreEnd",()=>{
-  logmng.add({type:"server",datatype:"str",data:`Restore End`,time:Date.now()})
+  logm.Server(`Restore End`)
 })
 
 // 自動0時フルバックアップ
@@ -1007,7 +951,7 @@ try {
     if (!search_flag) bp_packlist.push({"pack_id":addon_uuid,"version":manifest.header.version})
     await fs.writeFile(path.join(bp_packlist_path),JSON.stringify(bp_packlist,null,2))
     if (config.console.bswSystemLogToConsole) console.log(chalk.bgBlue("defaultAdd-on copy success"))
-    logmng.add({"type":"server","datatype":"str","data":"defaultAdd-on copy success","time":Date.now()})
+    logm.Server(`defaultAdd-on copy success`)
     
     WSbroadcast({"type":"server","datatype":"str","data":"defaultAdd-on copy success"})
 
@@ -1025,7 +969,7 @@ const bm = new BanManager(root)
 /**
  * @type {BDS}
  */
-let bds = new BDS(BDS_path,BDS_file,logmng,wss)
+let bds = new BDS(BDS_path,BDS_file,logm,wss)
 
 
 
@@ -1061,7 +1005,7 @@ bds.on("started",()=>{
 })
 // BDS Spawn
 bds.on("spawn",(json)=>{
-  logmng.add({"type":"PlayerJoin","data":json.name,"time":Date.now()})
+  logm.PlayerJoin(json.name)
   WSbroadcast({"type":"PlayerJoin","data":json.name})
   onlinePlayer.join(json)
   LLtoDis(json.name,"join")
@@ -1083,7 +1027,6 @@ bds.on("spawn",(json)=>{
 
 // BDS Leave
 bds.on("leave",(json)=>{
-  logmng.add({"type":"PlayerLeave","data":json.name,"time":Date.now()})
   WSbroadcast({"type":"PlayerLeave","data":json.name})
 
   onlinePlayer.leave(json.name)
@@ -1120,26 +1063,15 @@ bds.on('line', (line) => {
 
       if (json.type == "Logger" && json.cmd == "playerLeave") {
         const {source} = json;
-        if (!config.lastLocationLog.enabled) return {skip:true};
-        (async()=>{
-          try {
-            const playername = source.replace(/\(.* .* .*\)/,"")
-            const [x, y, z] = source.replace(playername,"").replace("(","").replace(")","").split(" ").map(Number)
-            const json = {playername,"location":{x,y,z},"timestamp":Date.now(),worldname}
-            const res = await Couch.lll.post("/",json)
-            if (res.status < 200 || res.status >= 300) {
-              const errtext = `(${res.status})${res.data}`
-              console.error(`[NODE-ERR]${chalk.red(errtext)}`);
-            }
-          } catch(e) {
-              console.error(`[NODE-ERR]${chalk.red(e.message)}`);
-          }
-        })()
+        const dim = json.data
+        const playername = source.replace(/\(.* .* .*\)/,"")
+        const [x, y, z] = source.replace(playername,"").replace("(","").replace(")","").split(" ").map(Number)
+        logm.PlayerLeave(playername,{x,y,z},dim)
         return {skip:true}
       }
 
       if (json.type == "Request" && json.cmd == "SyncConfRequest") {
-        bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`)
+        bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
         return {skip:true}
       }
     }
@@ -1170,8 +1102,7 @@ process.on("exit",()=>{
 
 function OnError(err) {
   console.error(chalk.red('UNHANDLED REJECTION:'), err);
-  logmng.add({"type":"server","datatype":"str","data":`ERROR - ${err.name} | ${err.message}`,"time":Date.now()});
-
+  logm.Server(`ERROR - ${err.name} | ${err.message}`);
   (async()=>{
     try {
       if (config.Discord.enabled && channels.serverStatus &&config.Discord.notifications.serverStatus.enabled&&client.isReady()) {

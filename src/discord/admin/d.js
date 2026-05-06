@@ -1,16 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config/config.js");
-const { Logger } = require("../../logger.js");
 const { Types } = require("../../logger.js");
 
-/**
- * 
- * @param {*} playername 
- * @param {*} message 
- * @param {*} channel 
- * @param {Logger} logger 
- * @returns 
- */
 async function d(playername,message,channel,logger) {
   if (!channel) return
   if (!config.Discord.notifications.toAdmin.deathInfo.enabled) return

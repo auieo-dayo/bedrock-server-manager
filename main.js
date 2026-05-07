@@ -1036,6 +1036,13 @@ bds.on("leave",(json)=>{
   if (config.console.leavePlayerLogToConsole) console.log(chalk.bgBlue(`PlayerLeave:${json.name}`))
 })
 
+// SKIPLIST
+
+const LineSkipList = [
+  /^[.* INFO] Saving\.\.\./,
+  /^[.* INFO] Changes to the world are resumed\./
+]
+
 // BDS line
 bds.on('line', (line) => {
 
@@ -1076,6 +1083,8 @@ bds.on('line', (line) => {
         return {skip:true}
       }
     }
+
+    if (LineSkipList.some(v=>v.test(line))) return {skip:true}
 });
 
 let stop = false

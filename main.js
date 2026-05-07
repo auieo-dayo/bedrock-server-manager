@@ -223,7 +223,7 @@ app.post('/api/bds/send',async (req,res,next)=>{
         break;
       }
       case "blockEvent": {
-        if (![0,1].includes(body.type)) res.status(400).type("json").send({"status":false});
+        if (![0,1].includes(body.action)) return res.status(400).type("json").send({"status":false});
 
         const {typeid,dim,player,location,action} = body
 
@@ -291,7 +291,7 @@ app.get('/api/getlog', async (req, res, next) => {
     const logs = content.map((value)=>{
       const type = types[value.type]
 
-      const metadata = value.metadata
+      const metadata = JSON.parse(value.metadata)
 
       const json = {
         type,
@@ -558,8 +558,9 @@ async function PlayerinfotoDis(json) {
       
       if (res) {
         const date = new Date(res.time)
+        const metadata = JSON.parse(res.metadata)
         const dateja = `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}時${String(date.getMinutes()).padStart(2, "0")}分${String(date.getSeconds()).padStart(2, "0")}秒`
-        embed.setDescription(`[${playername}]の最終ログアウト情報\nログアウト場所:${res.metadata.location.x.toFixed(0)} ${res.metadata.location.y.toFixed(0)} ${res.metadata.location.z.toFixed(0)}\nログアウト時刻:${dateja}`)
+        embed.setDescription(`[${playername}]の最終ログアウト情報\nログアウト場所:${metadata.location.x.toFixed(0)} ${metadata.location.y.toFixed(0)} ${metadata.location.z.toFixed(0)}\nログアウト時刻:${dateja}`)
       }  else {
         embed.setDescription(`[${playername}]の最終ログアウト情報が見つかりませんでした。`)
       }
@@ -1118,9 +1119,9 @@ function OnError(err) {
     }
   })();
 
- fs.ensureDirSync(path.join(root,"log","error"))
+ fs.ensureDirSync(path.join(root,"error"))
   const content = err.stack || JSON.stringify(err, null, 2)
- fs.writeFileSync(path.join(root,"log","error",`${Date.now()}-ERROR.err`),content)
+ fs.writeFileSync(path.join(root,"error",`${Date.now()}-ERROR.err`),content)
 }
 
 process.on('unhandledRejection', err => {

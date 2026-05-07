@@ -135,6 +135,38 @@ const commandlist = [
                 type: ApplicationCommandOptionType.Subcommand,
             }
         ]
+    },
+    {
+        name: "block",
+        defaultMemberPermissions:"Administrator",
+        description: "ブロックの設置、破壊に関するイベント",
+        options: [
+            {
+                name: "type",
+                description: "イベントタイプ",
+                type: ApplicationCommandOptionType.String,
+                choices: [
+                    {name: "設置",value: "place"},
+                    {name: "破壊",value: "break"},
+                ],
+            },
+            {
+                name: "player",
+                description: "プレイヤーで絞り込み",
+                type: ApplicationCommandOptionType.String,
+            },
+            {
+                name: "block",
+                description: "ブロックで絞り込み",
+                type: ApplicationCommandOptionType.String,
+                autocomplete:true
+            },
+            {
+                name: "minutes",
+                description: "時間で絞り込み(分)",
+                type: ApplicationCommandOptionType.Integer
+            }
+        ]
     }
 ]
 /**

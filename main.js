@@ -774,6 +774,18 @@ async function getBackupCache() {
   return backupCache.data
   
 }
+
+const Blocks = {list:new Set(),last:0}
+function getBlocks() {
+  const diff =  Date.now() - Blocks.last
+  if (1000*60*10 <= diff) {
+    const res = logm.db.prepare(`SELECT DISTINCT typeid FROM blockevents`).all()
+    Blocks.list = new Set(res.map(v=>v.typeid))
+    Blocks.last = Date.now()
+  }
+  return Blocks.list
+}
+
 // Discordイベント
 client.on(discord.Events.InteractionCreate,async (interaction)=>{
   const { channel } = interaction
@@ -781,14 +793,46 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
   if(config.Discord.guildId !== channel.guildId) return
   // AutoCompleteの設定
   if (interaction.isAutocomplete()) {
-    const focused = interaction.options.getFocused();
-    const cachelist = await getBackupCache()
-    let blist = [...cachelist].sort((a,b)=>Number(b.value) - Number(a.value))
-    if (focused) {
-      blist = blist.filter((v)=>`${v.value}`.startsWith(focused))
+    const focused = interaction.options.getFocused(true);
+    const commandName = interaction.commandName
+    // BlockEventsのAutoComplete
+    if (focused.name == "block" && commandName == "block") {
+      const q = focused.value.toLowerCase()
+      /**
+       * @type {string[]}
+       */
+      const blocks = [...getBlocks()]
+      const starts = blocks.filter(v =>{
+        return v.toLowerCase().startsWith(q) || v.toLowerCase().replace("minecraft:","").startsWith(q)
+      })
+      const includes = blocks.filter(v => {
+        const lower = v.toLowerCase()
+        const clean = lower.replace("minecraft:", "")
+
+        return (
+          !lower.startsWith(q) &&
+          !clean.startsWith(q) &&
+          (
+            lower.includes(q) ||
+            clean.includes(q)
+          )
+        )
+      })
+
+      const result = [...starts, ...includes].slice(0,25).map((v)=>{return {name:v,value:v}})
+            
+      return await interaction.respond(result)
     }
-    blist = blist.slice(0,25)
-    return await interaction.respond(blist)
+    // BackupのAutoComplete
+    if (focused.name == "target" && commandName == "backup") {
+      const cachelist = await getBackupCache()
+      let blist = [...cachelist].sort((a,b)=>Number(b.value) - Number(a.value))
+      if (focused.value) {
+        blist = blist.filter((v)=>`${v.value}`.startsWith(focused.value))
+      }
+      blist = blist.slice(0,25)
+      return await interaction.respond(blist)
+    }
   }
 
   // コマンド以外ならreturn
@@ -840,7 +884,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     
     if (sub === "ban") {
       const reason = options.getString("reason")
-      const expired = options.getNumber("expired")
+      const expired = options.getInteger("expired")
       let expiredtime = Date.now()
       if (expired) expiredtime+=expired*60*60*1000
       return await discordCommands.admin.ban.ban(gamertag,reason,bm,onlinePlayer,bds,interaction,{author:interaction.user.username,isdiscord:true},expired ? expiredtime : null)
@@ -850,6 +894,15 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
       case "isbanned": return await discordCommands.admin.ban.isbanned(bm,gamertag,interaction)
       case "pardon": return await discordCommands.admin.ban.pardon(gamertag,bm,interaction)
     }
+  }
+  // Block系
+  if (commandName === "block") {
+    const type = options.getString("type")
+    const player = options.getString("player")
+    const minutes = options.getInteger("minutes")
+    const block = options.getString("block")
+    
+    return await discordCommands.admin.block(interaction,type,player,block,minutes,logm)
   }
 })
 
@@ -1090,14 +1143,22 @@ bds.on('line', (line) => {
 let stop = false
 // Ctrl+C
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async() => {
   console.log(chalk.green("stoping BDS..."))
+  if (backup && backup.isbackuping) {
+    console.log(chalk.green("Wait for backup ended..."))
+    await backup.waitForBackupEnd()
+  }
   stop = true
   bds.exit()
 });
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async() => {
   console.log(chalk.green("stoping BDS..."))
+  if (backup && backup.isbackuping) {
+    console.log(chalk.green("Wait for backup ended..."))
+    await backup.waitForBackupEnd()
+  }
   stop = true
   bds.exit()
 });

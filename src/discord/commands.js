@@ -9,7 +9,9 @@ const ban = require("./admin/ban")
 
 const backup = require("./admin/backup")
 
+const block = require("./admin/block")
+
 module.exports = {
     chat: { pl },
-    admin: { p, d, ban, backup }
+    admin: { p, d, ban, backup, block }
 }

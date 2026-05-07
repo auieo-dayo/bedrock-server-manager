@@ -884,7 +884,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     
     if (sub === "ban") {
       const reason = options.getString("reason")
-      const expired = options.getInteger("expired")
+      const expired = options.getNumber("expired")
       let expiredtime = Date.now()
       if (expired) expiredtime+=expired*60*60*1000
       return await discordCommands.admin.ban.ban(gamertag,reason,bm,onlinePlayer,bds,interaction,{author:interaction.user.username,isdiscord:true},expired ? expiredtime : null)

@@ -97,12 +97,28 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 
 使用例：`?p PlayerName` または `?playerinfo PlayerName`
 
+##### ban（BAN管理）
+
+管理者用チャンネルからプレイヤーのBAN情報を管理できます。
+
+| プロパティ    | 型    | 説明                                    |
+| -------- | ----- | ------------------------------------- |
+| `enabled` | boolean | BAN管理機能を有効化するか                     |
+| `prefix`  | array   | コマンドプレフィックス。例：`?b`, `?ban` |
+
+使用例：
+- `?b list` - BAN一覧を表示
+- `?b isbanned PlayerName` - プレイヤーがBANされているか確認
+- `?b ban PlayerName reason` - プレイヤーをBAN
+- `?b pardon PlayerName` - プレイヤーのBANを解除
+
 ### 設定例
 
 ```javascript
 "Discord": {
     "TOKEN":"YOUR_BOT_TOKEN_HERE",
     "enabled":true,
+    "guildId": "123456789012345678",
     "notifications": {
         "chat": {
             "enabled": true,
@@ -123,6 +139,10 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
             "playerInfo": {
                 "enabled":true,
                 "prefix": ["?p","?playerinfo"]
+            },
+            "ban": {
+                "enabled": true,
+                "prefix": ["?b","?ban"]
             }
         }
     }
@@ -139,17 +159,19 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 
 | プロパティ         | 型      | 説明                                   |
 | -------------- | ------ | ------------------------------------ |
+| `enabled`      | boolean | バックアップを有効化するか                    |
 | `interval`     | number | バックアップの実行間隔（分）                    |
 | `pauseIfNoPlayer` | boolean | プレイヤーがいない時にバックアップを停止するか    |
-| `skipForPlayers` | array   | 指定ユーザーのみの場合、バックアップをスキップする |
+| `leavePlayerBackup` | boolean | プレイヤーが抜けたときにバックアップするか |
 
 ### 設定例
 
 ```javascript
 "backup": {
+    "enabled": true,
     "interval": 30,
-    "pauseIfNoPlayer": true,
-    "skipForPlayers": ["Player1", "Player2"]
+    "leavePlayerBackup": true,
+    "pauseIfNoPlayer": true
 }
 ```
 
@@ -166,6 +188,7 @@ Web管理画面にアクセスする際の設定です。
 | `port`    | number | Web UIのポート番号（デフォルト3000） |
 | `username` | string  | ログインユーザー名           |
 | `password` | string  | ログインパスワード           |
+| `trustProxy` | boolean \| number | リバースプロキシを信頼するか（boolean または信頼するホップ数） |
 
 ### 設定例
 
@@ -173,81 +196,8 @@ Web管理画面にアクセスする際の設定です。
 "webUi": {
     "port": 3000,
     "username":"admin",
-    "password":"admin"
-}
-```
-
----
-
-## 5. lastLocationLog（最後の座標ログ設定）
-
-プレイヤーが退出する際に、その時点での座標を自動で保存します。
-
-### プロパティ
-
-| プロパティ          | 型      | 説明                   |
-| -------------- | ------ | -------------------- |
-| `saveLocationLog` | boolean | 座標を自動保存するか     |
-
-### CouchDB設定
-
-| プロパティ | 型     | 説明                    |
-| ------ | ----- | --------------------- |
-| `baseurl` | string | CouchDBのベースURL      |
-| `dbname` | string | データベース名           |
-| `user.name` | string | CouchDB管理者ユーザー名 |
-| `user.pass` | string | CouchDB管理者パスワード |
-
-### 設定例
-
-```javascript
-"lastLocationLog": {
-    "saveLocationLog": true,
-    "CouchDB": {
-        "baseurl": "https://couchdb.example.com",
-        "dbname": "lastlocation",
-        "user": {
-            "name": "admin",
-            "pass": "password"
-        }
-    }
-}
-```
-
----
-
-## 6. deathLocationLog（死亡時座標ログ設定）
-
-プレイヤーが死亡した際に、その時点での座標を自動で保存します。
-
-### プロパティ
-
-| プロパティ               | 型      | 説明                   |
-| -------------------- | ------ | -------------------- |
-| `saveDeathLocationLog` | boolean | 座標を自動保存するか     |
-
-### CouchDB設定
-
-| プロパティ | 型     | 説明                    |
-| ------ | ----- | --------------------- |
-| `baseurl` | string | CouchDBのベースURL      |
-| `dbname` | string | データベース名           |
-| `user.name` | string | CouchDB管理者ユーザー名 |
-| `user.pass` | string | CouchDB管理者パスワード |
-
-### 設定例
-
-```javascript
-"deathLocationLog": {
-    "saveDeathLocationLog": true,
-    "CouchDB": {
-        "baseurl": "https://couchdb.example.com",
-        "dbname": "deathlocation",
-        "user": {
-            "name": "admin",
-            "pass": "password"
-        }
-    }
+    "password":"admin",
+    "trustProxy": false
 }
 ```
 
@@ -257,6 +207,5 @@ Web管理画面にアクセスする際の設定です。
 
 1. `config.sample.js` をコピーしてファイル名を `config.js` に変更します
 2. `config.js` をテキストエディタで開き、必要な設定を変更します
-3. 特にDiscordボットの場合は、`TOKEN` フィールドにあなたのBot Tokenを入力してください
-4. CouchDBを使用する場合は、`baseurl`、`dbname`、ユーザー情報を設定してください
-5. 設定が完了したら、BSWを起動すると新しい設定が適用されます
+3. 特にDiscordボットの場合は、`TOKEN` フィールドにあなたのBot Tokenを入力し、`guildId` を設定してください
+4. 設定が完了したら、BSWを起動すると新しい設定が適用されます

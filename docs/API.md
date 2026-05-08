@@ -197,3 +197,133 @@
 | `todaybackuplist[].date.ss`    | number  | 秒              |
 | `todaybackuplist[].fullpathja` | string  | 日本語表記の日時       |
 | `todaybackuplist[].full`       | boolean | フルバックアップかどうか   |
+
+---
+
+## 5. `/api/dashboard`
+
+### 概要
+
+ダッシュボード用に、サーバー情報、オンラインプレイヤー、バックアップリストをまとめて取得する。
+
+### メソッド
+
+`GET`
+
+### レスポンス例
+
+```json
+{
+  "info": {
+    "BDS": {
+      "servername": "MyServer",
+      "levelname": "world",
+      "gamemode": "survival",
+      "difficulty": "normal",
+      "player": {
+        "max": 10,
+        "now": 2
+      },
+      "version": "1.21.131.1"
+    },
+    "server": {
+      "mem": {
+        "free": 7.5,
+        "total": 16,
+        "par": 53.125
+      },
+      "cpu": {
+        "par": 12.3
+      }
+    }
+  },
+  "onlines": [
+    {
+      "name": "Player1",
+      "xuid": 2535430894533979
+    },
+    {
+      "name": "Player2",
+      "xuid": 2535469401581741
+    }
+  ],
+  "backups": {
+    "allbackup": 77,
+    "today": 77,
+    "todaybackuplist": [...]
+  }
+}
+```
+
+### フィールド
+
+| フィールド    | 型     | 説明                      |
+| ------- | ----- | ----------------------- |
+| `info`  | object | `/api/info` と同じ形式      |
+| `onlines` | array | `/api/nowonline` と同じ形式 |
+| `backups` | object | `/api/backuplist` と同じ形式 |
+
+---
+
+## 6. `/api/getwstoken`
+
+### 概要
+
+WebSocket接続時に使用するトークンを取得する。
+
+### メソッド
+
+`GET`
+
+### レスポンス例
+
+```json
+{
+  "token": "abcd1234-efgh5678-ijkl9012"
+}
+```
+
+### フィールド
+
+| フィールド | 型     | 説明                         |
+| ----- | ----- | -------------------------- |
+| `token` | string | WebSocket接続に使用するトークン文字列 |
+
+### 使用方法
+
+取得したトークンを使用してWebSocket接続時に以下のように指定します：
+
+```
+ws://localhost:3000/ws?token=<取得したトークン>
+```
+
+---
+
+## 7. `/api/getbdspw`
+
+### 概要
+
+BDSアドオンからサーバーに送信するデータを認証する際に使用するパスワードを取得する。
+
+### メソッド
+
+`GET`
+
+### レスポンス例
+
+```json
+{
+  "password": "unique-password-string-1234567890"
+}
+```
+
+### フィールド
+
+| フィールド    | 型     | 説明                              |
+| ------- | ----- | ------------------------------- |
+| `password` | string | BDS送信用パスワード（Basic Auth用） |
+
+### 注記
+
+- このエンドポイントは `127.0.0.1` および `::1` からのアクセスのみ許可されます
+- 取得したパスワードはBDSアドオンの `/api/bds/send` エンドポイント認証に使用されます

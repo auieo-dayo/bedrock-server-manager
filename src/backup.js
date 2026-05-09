@@ -370,16 +370,17 @@ class Backup {
         const applyList = list.slice(startIndex);
 
         console.log(chalk.bgGreen(`Start:${applyList[0].fullpath} to End:${applyList[applyList.length-1].fullpathja}`))
+        const worldspath = path.join(this.BDS, "worlds");
+        const restorePath = path.join(worldspath,`${this.worldname}_tmp`);
 
-        const restorePath = path.join(this.BDS, "worlds", this.worldname);
-
-        // 一旦消す
-        try {
-            await fs.remove(restorePath);
-        } catch (err) {
-            console.error("[Restore -Error] ", err && err.stack ? err.stack : err);
-        }
-
+        // // 一旦消す
+        // try {
+        //     await fs.remove(restorePath);
+        // } catch (err) {
+        //     console.error("[Restore -Error] ", err && err.stack ? err.stack : err);
+        // }
+        
+        await fs.remove(restorePath)
         await fs.ensureDir(restorePath);
 
         for (const backup of applyList) {
@@ -394,6 +395,8 @@ class Backup {
                 await fs.copy(src, dest);
             }
         }
+        await fs.rename(path.join(worldspath,this.worldname),path.join(worldspath,`${this.worldname}_old_${Date.now()}`))
+        await fs.rename(restorePath,path.join(worldspath,this.worldname))
         console.log(chalk.bgGreen(`Completed Restore from Backups`))
         this.emit("restoreEnd",date)
         this.isrestoring = false

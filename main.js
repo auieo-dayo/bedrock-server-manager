@@ -347,8 +347,8 @@ async function getinfo() {
       },
       "cpu": {
         "par": cpu
-      }
-      
+      },
+      BSWVer
     }
     }
 }

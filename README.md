@@ -118,6 +118,6 @@ Discord Botを設定すると、以下のアプリケーションコマンド（
 
 ---
 
-> このプロジェクトでは、デフォルトのWebダッシュボードに Yusei Magic フォント（SIL Open Font License 1.1）を使用しています。
+> デフォルトのWebダッシュボードに複数のSIL Open Font License 1.1ライセンスフォントを使用しています。ライセンス詳細はフォント名.LICENSEファイルを確認してください
 
 > README.md、及びdocs/内のmdファイルには生成AIを使用しています

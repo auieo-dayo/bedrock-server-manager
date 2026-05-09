@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="./index.js"></script>
+  <link rel="stylesheet" href="./index.css">
+  <title>BSW Dashboard</title>
+</head>
+<body>
+  <nav>
+    <p class="title">BSW Dashboard</p>
+    <div id="nav-btn">
+        <button class="button" id="nav-btn-info">Info</button>
+        <button class="button" id="nav-btn-console">Console</button>
+        <button class="button" id="nav-btn-backup">Backups</button>
+    </div>
+    <p style="position: absolute;left: 95%;transform: translateX(-95%);bottom: 0;" id="time">00:00</p>
+  </nav>
+    <div style="height: 35px;width: 100%;"></div>
+
+  <div id="info">
+    <div style="position: absolute;top: 50%;left:50%;transform: translate(-50%,-50%);">
+        <h1>ServerName:<span class="info-data" id="info-server">...</span></h1>
+        <h1>BDS-Version:<span class="info-data" id="info-BDS-ver">...</span></h1>
+        <h1>BSW-Version:<span class="info-data" id="info-BSW-ver">...</span></h1>
+        <h1>Player:<span class="info-data" id="info-pl-online">...</span>/<span class="info-data" id="info-pl-max">...</span></h1>
+        <h1>CpuUsing:<span class="info-data" id="info-cpu-using">...</span>%</h1>
+        <h1>MemFree:<span class="info-data" id="info-mem-free">...</span>GB</h1>
+        <h1>MemUsing:<span class="info-data" id="info-mem-using">...</span>%</h1>
+    </div>
+
+  </div>
+
+  <div id="console" style="display: none;">
+    <div id="logs"></div>
+    <div id="bottom-toolbar">
+      <input type="text" id="input">
+      <button id="submit">実行</button>
+    </div>
+  </div>
+
+  <div id="backups" style="display: none;">
+    <div>
+      <h1 style="text-align: center;">All:<span id="Backup_all">...</span>|Today:<span id="Backup_today"></span></h1>
+      <div id="backup_list"></div>
+    </div>
+  </div>
+  <!-- Window PL -->
+  <div id="playerList" class="window">
+    <h4>PlayerList</h4>
+    <ul>        
+    </ul>
+  </div>
+  <!-- Window Bar -->
+   <div class="window" id="SystemBar">
+    <h4>CPU</h4>
+    <div class="bar" id="cpubar"><div class="fill"><p><span>100</span>%</p></div></div>
+    <h4>MEM</h4>
+    <div class="bar" id="membar"><div class="fill"><p><span>100</span>%</p></div></div>
+   </div>
+
+</body>
+</html>

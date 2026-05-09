@@ -68,58 +68,58 @@ async function setbackup(data) {
 }
 
 function setmove(box) {
-let dragging = false;
-let offsetX, offsetY;
+    let dragging = false;
+    let offsetX, offsetY;
 
-// 上下左右の余白(px)
-const limits = {
-    top: 38,    // 上から35px
-    left: 5,    // 左から5px
-    right: 5,   // 右から5px
-    bottom: 5   // 下から5px
-};
-
-function calcBounds() {
-    return {
-        xMin: limits.left,
-        yMin: limits.top,
-        xMax: window.innerWidth - limits.right - box.offsetWidth,
-        yMax: window.innerHeight - limits.bottom - box.offsetHeight
+    // 上下左右の余白(px)
+    const limits = {
+        top: 38,    // 上から35px
+        left: 5,    // 左から5px
+        right: 5,   // 右から5px
+        bottom: 5   // 下から5px
     };
-}
 
-let bounds = calcBounds();
+    function calcBounds() {
+        return {
+            xMin: limits.left,
+            yMin: limits.top,
+            xMax: window.innerWidth - limits.right - box.offsetWidth,
+            yMax: window.innerHeight - limits.bottom - box.offsetHeight
+        };
+    }
 
-// ウィンドウリサイズ時も再計算
-window.addEventListener('resize', () => {
-    bounds = calcBounds();
-});
+    let bounds = calcBounds();
 
-box.addEventListener('mousedown', e => {
-    dragging = true;
-    offsetX = e.clientX - box.offsetLeft;
-    offsetY = e.clientY - box.offsetTop;
-    box.style.cursor = 'grabbing';
-});
+    // ウィンドウリサイズ時も再計算
+    window.addEventListener('resize', () => {
+        bounds = calcBounds();
+    });
 
-document.addEventListener('mousemove', e => {
-    if (!dragging) return;
+    box.addEventListener('mousedown', e => {
+        dragging = true;
+        offsetX = e.clientX - box.offsetLeft;
+        offsetY = e.clientY - box.offsetTop;
+        box.style.cursor = 'grabbing';
+    });
 
-    let newX = e.clientX - offsetX;
-    let newY = e.clientY - offsetY;
+    document.addEventListener('mousemove', e => {
+        if (!dragging) return;
 
-    // 範囲制限
-    newX = Math.max(bounds.xMin, Math.min(bounds.xMax, newX));
-    newY = Math.max(bounds.yMin, Math.min(bounds.yMax, newY));
+        let newX = e.clientX - offsetX;
+        let newY = e.clientY - offsetY;
 
-    box.style.left = newX + 'px';
-    box.style.top = newY + 'px';
-});
+        // 範囲制限
+        newX = Math.max(bounds.xMin, Math.min(bounds.xMax, newX));
+        newY = Math.max(bounds.yMin, Math.min(bounds.yMax, newY));
 
-document.addEventListener('mouseup', () => {
-    dragging = false;
-    box.style.cursor = 'grab';
-});
+        box.style.left = newX + 'px';
+        box.style.top = newY + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+        dragging = false;
+        box.style.cursor = 'grab';
+    });
 }
 
 function setinfo(json) {
@@ -145,6 +145,7 @@ function setinfo(json) {
 }
 
 function addlog(json) {
+    if (json.type == "chat") addChat(json)
     const p = document.createElement("p")
     p.textContent = json.data
     p.classList.add(json.type)
@@ -153,6 +154,12 @@ function addlog(json) {
     logs.scroll({behavior:"smooth",top:logs.scrollHeight})
 }
 
+function addChat(json) {
+    const div = document.getElementById("ChatWindow").querySelector(".list")
+    const p = document.createElement("p")
+    p.textContent = json.data
+    div.appendChild(p)
+}
 
 
 document.addEventListener("DOMContentLoaded",async ()=>{
@@ -197,6 +204,7 @@ document.addEventListener("DOMContentLoaded",async ()=>{
 
     setmove(document.getElementById("playerList"))
     setmove(document.getElementById("SystemBar"))
+    setmove(document.getElementById("ChatWindow"))
 
 
 

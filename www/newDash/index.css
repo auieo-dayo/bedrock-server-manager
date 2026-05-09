@@ -125,6 +125,19 @@ nav {
     background-color: rgba(255, 194, 237, 0.521);
 }
 
+/* Chats */
+#ChatWindow {
+    /* width: max-content; */
+    scrollbar-width: 5px;
+    scrollbar-color: #000000 #ffffff00;
+    background-color: rgba(153, 194, 134, 0.815);
+    border-radius: 10px;
+    width: 10vw;
+    height: 40vh;
+    right: calc(5px + 10vw + 5px);
+    bottom: calc(5px + 5px);
+}
+
 /* CONSOLE */
 
 #logs {

@@ -32,7 +32,7 @@ async function block(message,type,player,block,minutes,logm) {
     if (!data[0]) embed.setDescription("<Null>"); else {
         const num = (v)=>Number(v).toFixed(0)
         
-        data.splice(0,50).forEach((v)=>{
+        data.forEach((v)=>{
             const time = new Date(v.time)
             const Type = v.actiontype === Types.blockevents.actiontype.PlaceBlock ? "設置" : "破壊"
             let dim

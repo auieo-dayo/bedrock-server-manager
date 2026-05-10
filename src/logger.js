@@ -66,8 +66,6 @@ class Logger {
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_blockevents_player_time ON blockevents(player, time DESC);`)
         // ディメンション + 座標(x,z,y)
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_blockevents_coords ON blockevents(dimension, x, z, y, time DESC);`)
-        // 時間
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_blockevents_time ON blockevents(time DESC);`)
         // ブロックの種類
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_blockevents_type_time_player ON blockevents(typeid, time DESC);`)
     }

@@ -1072,7 +1072,7 @@ bds.on("spawn",(json)=>{
     const NowtoBanEndText = BanEnd ? msToYMDHMS(new Date(),BanEnd) : "無期限" 
 
     setTimeout(()=>{
-      bds.sendCommand(`kick ${json.name} "あなたは「§l${baninfo.reason}§r」により§l${BanStartText}§rから§l${BanEndText}§rの間BANされています。解除まで:§l${NowtoBanEndText}§r"`,true) 
+      bds.sendCommand(`kick "${json.name}" "あなたは「§l${baninfo.reason}§r」により§l${BanStartText}§rから§l${BanEndText}§rの間BANされています。解除まで:§l${NowtoBanEndText}§r"`,true) 
     },1000*4)
     if (config.Discord.notifications.toAdmin.ban.enabled && channels.admin) channels.admin.send({content:`BAN者[${json.name}]を自動キックしました`})
   }

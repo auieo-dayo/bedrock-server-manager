@@ -40,7 +40,7 @@ async function block(message,type,player,block,minutes,logm) {
             if (v.dimension === Types.dimension.Nether) dim = "Nether"
             if (v.dimension === Types.dimension.TheEnd) dim = "TheEnd"
             const {player,typeid,x,y,z} = v
-            md+=`- ${formatDate(time)}に、${player}が${typeid}を${Type}した(\`${num(x)} ${num(y)} ${num(z)}(${dim})\`)。\n\n`
+            md+=`- ${formatDate(time)}に、${player}が${typeid}を**${Type}**した(\`${num(x)} ${num(y)} ${num(z)}(${dim})\`)。\n\n`
         })
         embed.setDescription(md)
     }

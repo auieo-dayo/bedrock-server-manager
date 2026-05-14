@@ -131,6 +131,10 @@ Discord Botを設定すると、以下のアプリケーションコマンド（
 - `/block` - 全ブロックイベント
 - `/block type:place player:Player1 block:diamond_ore minutes:60` - 詳細な絞り込み
 
+#### `/debug` - デバッグ情報取得
+デバッグ情報を取得します
+
+
 ---
 
 > デフォルトのWebダッシュボードに複数のSIL Open Font License 1.1ライセンスフォントを使用しています。ライセンス詳細はフォント名.LICENSEファイルを確認してください

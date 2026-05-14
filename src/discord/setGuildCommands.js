@@ -167,6 +167,11 @@ const commandlist = [
                 type: ApplicationCommandOptionType.Integer
             }
         ]
+    },
+    {
+        name: "debug",
+        description: "debug用情報を取得します",
+        defaultMemberPermissions:"Administrator",
     }
 ]
 /**

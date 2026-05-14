@@ -940,6 +940,10 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     
     return await discordCommands.admin.block(interaction,type,player,block,minutes,logm)
   }
+  // debug
+  if (commandName == "debug") {
+    return await discordCommands.admin.debug(interaction,logm)
+  }
 })
 
 

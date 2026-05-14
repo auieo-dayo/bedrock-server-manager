@@ -11,7 +11,9 @@ const backup = require("./admin/backup")
 
 const block = require("./admin/block")
 
+const debug = require("./admin/debug")
+
 module.exports = {
     chat: { pl },
-    admin: { p, d, ban, backup, block }
+    admin: { p, d, ban, backup, block, debug }
 }

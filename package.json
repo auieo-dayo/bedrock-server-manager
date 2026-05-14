@@ -1,6 +1,6 @@
 {
   "name": "bedrock-server-wrapper",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "main": "main.js",
   "scripts": {
     "start": "node main.js"
@@ -19,6 +19,7 @@
     "express-basic-auth": "^1.2.1",
     "express-rate-limit": "^8.3.2",
     "fs-extra": "^11.3.0",
+    "prismarine-nbt": "^2.8.0",
     "properties-reader": "^2.3.0",
     "uuid": "^11.1.0",
     "ws": "^8.18.3"

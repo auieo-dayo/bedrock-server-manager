@@ -22,7 +22,7 @@ const {formatDate,msToYMDHMS} = require("./src/formatDate")
 const BDS = require("./src/BDS")
 const Backup = require("./src/backup")
 const Logger = require("./src/logger")
-
+const betaApi = require("./src/enableBetaApi")
 
 
 // project-root
@@ -1017,31 +1017,76 @@ try {
 // Addon Sync
 addon_copy()
 
-const bm = new BanManager(root)
+const bm = new BanManager(root);
+
+// 起動する前にワールドチェック
+
+const BetaApiEnable = {
+  restart: false,
+  retryAfterRestart: false,
+  enabled: false,
+  run: async()=>{
+    if (BetaApiEnable.enabled) return
+    console.log(chalk.green("[EnableBetaAPI] - BetaApiがオンか確認中..."))
+    const leveldat = path.join(BDS_path,"worlds",worldname,"level.dat")
+    
+    // ワールド生成前の場合、再起後に確認するように設定
+    if (!await fs.exists(leveldat)) {
+      console.log(chalk.green("[EnableBetaAPI] - ワールド生成前のため自動再起動と再実行を予定しました..."))
+      BetaApiEnable.restart = true
+      BetaApiEnable.retryAfterRestert = true
+      return
+    }
+    const originBuf = await fs.readFile(leveldat)
+
+    // 確認
+    const res = await betaApi.checkBetaApi(originBuf)
+    if (res.isBetaApiEnabled) {
+      BetaApiEnable.enabled = true
+      BetaApiEnable.restart = false
+      BetaApiEnable.retryAfterRestart = false
+      console.log(chalk.green("[EnableBetaAPI] - BetaAPIはオンになっています")) 
+    } else {
+      console.log(chalk.green("[EnableBetaAPI] - BetaAPIはオフになっています")) 
+      const enableBuf = await betaApi.enableBetaApi(originBuf)
+      console.log(chalk.green("[EnableBetaAPI] - BetaAPIを自動でオン&再起動します")) 
+      await fs.cp(leveldat,path.join(path.dirname(leveldat),"level.dat.old"))
+      await fs.rm(leveldat)
+      await fs.writeFile(leveldat,enableBuf)
+      BetaApiEnable.restart = true
+      if (BetaApiEnable.retryAfterRestart) BetaApiEnable.restart = false
+      BetaApiEnable.retryAfterRestart = false
+    }
+  }
+}
 
 // BDS Run
 /**
  * @type {BDS}
  */
-let bds = new BDS(BDS_path,BDS_file,logm,wss)
+let bds = new BDS(BDS_path,BDS_file,logm,wss,false);
 
 
 
+// スタート
+(async()=>{
+  await BetaApiEnable.run()
+  bds.restart()
+  // 初回Backup
+  let startedBackup = false;
 
-// 初回Backup
-let startedBackup = false;
-
-const waitBackup = setInterval(() => {
-  if (bds.server_started && !startedBackup) {
-    startedBackup = true;
-    clearInterval(waitBackup);
-    // 定期バックアップ
-    setInterval(async() => {
-      const list = await backup.waitForPreparationsComplete(bds)
-      await backup.backup(list,false,false,onlinePlayer,bds);
-    }, 1000 * 60 * BackupInterval);
-  }
-}, 500); // 0.5秒ごとにチェック
+  const waitBackup = setInterval(() => {
+    if (bds.server_started && !startedBackup) {
+      startedBackup = true;
+      clearInterval(waitBackup);
+      // 定期バックアップ
+      setInterval(async() => {
+        const list = await backup.waitForPreparationsComplete(bds)
+        await backup.backup(list,false,false,onlinePlayer,bds);
+      }, 1000 * 60 * BackupInterval);
+    }
+  }, 500); // 0.5秒ごとにチェック
+})();
 
 
 
@@ -1049,6 +1094,11 @@ const waitBackup = setInterval(() => {
 // アドオンにPWを伝える
 
 bds.on("started",()=>{
+  if (BetaApiEnable.restart) {
+    bds.exit()
+    bds.restart()
+    return
+  }
   if (discordstarted) sendStartEmbed()
   if (config.Discord.enabled) client.login(config.Discord.TOKEN);
   bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`)
@@ -1144,6 +1194,7 @@ let stop = false
 // Ctrl+C
 
 process.on('SIGINT', async() => {
+  if (!bds.started) process.exit(0)
   console.log(chalk.green("stoping BDS..."))
   if (backup && backup.isbackuping) {
     console.log(chalk.green("Wait for backup ended..."))
@@ -1154,6 +1205,7 @@ process.on('SIGINT', async() => {
 });
 
 process.on('SIGTERM', async() => {
+  if (!bds.started) process.exit(0)
   console.log(chalk.green("stoping BDS..."))
   if (backup && backup.isbackuping) {
     console.log(chalk.green("Wait for backup ended..."))
@@ -1206,6 +1258,10 @@ process.on('uncaughtException',err => {
 
 bds.on('close', async(code) => {
   console.log(chalk.green(`BDS終了(${code})`));
+
+  if (!stop && !BetaApiEnable.enabled) {
+    BetaApiEnable.run().then(()=>bds.restart())
+  }
 
   if (config.Discord.enabled && channels.serverStatus &&config.Discord.notifications.serverStatus.enabled&&client.isReady()) {
     const serverStopEmbed = new discord.EmbedBuilder()

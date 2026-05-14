@@ -3,7 +3,6 @@ const { spawn } = require("child_process");
 const readline = require("readline");
 const config = require("../config/config");
 const WebSocket = require("ws");
-const { Logger } = require("./logger");
 
 
 class BDS {
@@ -11,7 +10,7 @@ class BDS {
      * 
      * @param {Logger} logger 
      */
-    constructor(BDS_path,BDS_file,logger,wss) {
+    constructor(BDS_path,BDS_file,logger,wss,start=true) {
 
         this.logger = logger
         this.wss = wss
@@ -24,10 +23,10 @@ class BDS {
         }
         this.BDS_path = BDS_path
         this.BDS_file = BDS_file
-
-        this.started = true
-
-        this.__start(this.BDS_path,this.BDS_file)
+        if (start) {
+            this.started = true
+            this.__start(this.BDS_path,this.BDS_file)
+        }
     }
     restart() {
         if (this.started) return

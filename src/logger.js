@@ -16,11 +16,6 @@ const Types = {
             PlaceBlock:0,
             BreakBlock:1
         }
-    },
-    dimension: {
-        OverWorld:0,
-        Nether:1,
-        TheEnd:2
     }
 }
 
@@ -55,7 +50,7 @@ class Logger {
             player TEXT NOT NULL,
             time INTEGER NOT NULL,
             typeid TEXT NOT NULL,
-            dimension INTEGER NOT NULL,
+            dimension TEXT NOT NULL,
             x INTEGER NOT NULL,
             y INTEGER NOT NULL,
             z INTEGER NOT NULL
@@ -109,13 +104,13 @@ class Logger {
      * @param {string} player 
      * @param {string} reason 
      * @param {{x:number,y:number,z:number}} location 
-     * @param {"OverWorld"|"Nether"|"TheEnd"} dimension 
+     * @param {string} dimension 
      */
     Death(player,reason,location,dimension) {
         for (const v of Object.entries(location)) {if (typeof v[1] !== "number") throw new Error(`${v[1]} is not number(location:${v[0]})`)}
         if (typeof player !== "string") throw new Error(`${player} is not string(player)`)
         if (typeof reason !== "string") throw new Error(`${reason} is not string(reason)`)
-        if(typeof Types.dimension[dimension] !== "number") throw new Error(`[${dimension}] Validation error(dimension)`)
+        if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
         prepare.run(Date.now(),Types.events.death,player,`${player}(${reason})`,JSON.stringify({reason,location,dimension}))
     }
@@ -137,11 +132,12 @@ class Logger {
     }
     /**
      * @param {string} player 
-     * @param {"OverWorld"|"Nether"|"TheEnd"} dimension 
+     * @param {string} dimension 
      * @param {{x:number,y:number,z:number}} location  
     */
     PlayerLeave(player,location,dimension) {
         if (typeof player !== "string") throw new Error(`${player} is not string(player)`)
+        if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
         prepare.run(Date.now(),Types.events.PlayerLeave,player,null,JSON.stringify({location,dimension}))  
     }
@@ -151,29 +147,29 @@ class Logger {
     /**
      * @param {string} player 
      * @param {string} typeid 
-     * @param {"OverWorld"|"Nether"|"TheEnd"} dimension 
+     * @param {string} dimension 
      * @param {{x:number,y:number,z:number}} location 
      */
     PlaceBlock(player,typeid,dimension,location) {
         for (const v of Object.entries(location)) {if (typeof v[1] !== "number") throw new Error(`${v[1]} is not number(location:${v[0]})`)}
         if (typeof typeid !== "string") throw new Error(`${typeid} is not string(player)`)
-        if(typeof Types.dimension[dimension] !== "number") throw new Error(`[${dimension}] Validation error(dimension)`)
+        if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.blockevents.actiontype.PlaceBlock,player,typeid,Types.dimension[dimension],location.x,location.y,location.z)  
+        prepare.run(Date.now(),Types.blockevents.actiontype.PlaceBlock,player,typeid,dimension,location.x,location.y,location.z)  
     }
     /**
      * 
      * @param {string} player 
      * @param {string} typeid 
-     * @param {"OverWorld"|"Nether"|"TheEnd"} dimension 
+     * @param {string} dimension 
      * @param {{x:number,y:number,z:number}} location 
      */
     BreakBlock(player,typeid,dimension,location) {
         for (const v of Object.entries(location)) {if (typeof v[1] !== "number") throw new Error(`${v[1]} is not number(location:${v[0]})`)}
         if (typeof typeid !== "string") throw new Error(`${typeid} is not string(player)`)
-        if(typeof Types.dimension[dimension] !== "number") throw new Error(`[${dimension}] Validation error(dimension)`)
+        if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.blockevents.actiontype.BreakBlock,player,typeid,Types.dimension[dimension],location.x,location.y,location.z)  
+        prepare.run(Date.now(),Types.blockevents.actiontype.BreakBlock,player,typeid,dimension,location.x,location.y,location.z)  
     }
 
 }

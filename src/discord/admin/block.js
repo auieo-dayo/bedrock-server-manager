@@ -35,12 +35,9 @@ async function block(message,type,player,block,minutes,logm) {
         data.forEach((v)=>{
             const time = new Date(v.time)
             const Type = v.actiontype === Types.blockevents.actiontype.PlaceBlock ? "設置" : "破壊"
-            let dim
-            if (v.dimension === Types.dimension.OverWorld) dim = "Overworld"
-            if (v.dimension === Types.dimension.Nether) dim = "Nether"
-            if (v.dimension === Types.dimension.TheEnd) dim = "TheEnd"
+            const dim = v.dimension
             const {player,typeid,x,y,z} = v
-            md+=`- ${formatDate(time)}に、${player}が${typeid}を**${Type}**した(\`${num(x)} ${num(y)} ${num(z)}(${dim})\`)。\n\n`
+            md+=`- ${formatDate(time)}に、${player}が${typeid}を**${Type}**した\n-# (\`${num(x)} ${num(y)} ${num(z)}(${dim})\`)。\n\n`
         })
         embed.setDescription(md)
     }

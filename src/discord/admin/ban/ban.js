@@ -15,7 +15,7 @@ async function ban(playername,reason,bm,onlinePlayer,bds,message,author,expiredt
         const BanEndText = BanEnd ? msToYMDHMS(BanStart,BanEnd) : "無期限"
         const NowtoBanEndText = BanEnd ? msToYMDHMS(new Date(),BanEnd) : "無期限" 
 
-        bds.sendCommand(`kick ${playername} "あなたは「§l${reason}§r」により§l${BanStartText}§rから§l${BanEndText}§rの間BANされています。解除まで:§l${NowtoBanEndText}§r"`)
+        bds.sendCommand(`kick "${playername}" "あなたは「§l${reason}§r」により§l${BanStartText}§rから§l${BanEndText}§rの間BANされています。解除まで:§l${NowtoBanEndText}§r"`)
     };
     await message.reply({content:`${playername}を${reason}でBANしました`})
 }

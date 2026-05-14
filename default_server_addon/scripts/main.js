@@ -43,7 +43,7 @@ let BSW_SendPW = null
 
 console.log(JSON.stringify({"type":"Request","cmd":"SyncConfRequest","source":``,"data":"","isEntity":false}))
 
-function post(body) {
+function post(body,retry=0) {
     system.run(async()=>{
         if (!BSW_SendPW || !port) {
             console.error("Don't have SendPW")
@@ -58,9 +58,8 @@ function post(body) {
             req.addHeader('Content-Type', 'application/json')
             req.setBody(JSON.stringify(body))
             const res = await net.http.request(req)
-            if (res.status == 200) {
-                // 成功
-            } else {
+            if (res.status !== 200) {
+                if (retry < 3) return system.runTimeout(()=>post(body,retry+1),20*1)   
                 console.error(`[Sending] - ${res.status}`)
                 world.getDimension("overworld").runCommand(`titleraw @a actionbar {"rawtext":[{"text":"§a送信に失敗しました:${res.status}\n管理者に連絡してください..."}]}`)
             }

@@ -32,6 +32,21 @@ npm install
 2. BDS をダウンロードし、リポジトリルートに `bds` フォルダを置く
 3. `bds/worlds/world` を作成（ワールド配置用）
 
+## BetaAPI について
+
+BSW はワールド起動時に **Minecraft Scripting BetaAPI** の状態を自動判定・管理します。
+
+### 初回起動時の挙動
+- **ワールドが存在しない場合**: ワールド初期生成の後、自動再起動時に BetaAPI を有効にします
+- **既存ワールドを配置した場合**: 
+  - BetaAPI が無効な場合、自動的に `level.dat` を書き換えて BetaAPI を有効化
+  - その後サーバーが自動再起動し、BetaAPI が有効な状態で起動します
+
+### 技術的詳細
+- `level.dat` 内のバイナリ構造を解析・修正して BetaAPI を有効化
+- 元の `level.dat` は `level.dat.old` としてバックアップされます
+- この処理は起動時のみ実行されるため、運用中は BetaAPI の状態が保持されます
+
 ## 設定
 - `config.js`：BSW の動作設定（WebUI, Discord, backup 等）
 詳しくは[docs/config.md](docs/config.md) を参照してください。

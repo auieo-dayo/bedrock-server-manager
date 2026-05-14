@@ -200,6 +200,78 @@
 
 ---
 
+## 5. `/api/blockevents`
+
+### 概要
+
+プレイヤーによるブロック設置・破壊イベントのログを取得する。クエリパラメータでフィルタリング可能。
+
+### メソッド
+
+`GET`
+
+### クエリパラメータ
+
+| パラメータ     | 型      | 説明                                      | 例            |
+| --------- | ------ | --------------------------------------- | ------------ |
+| `actiontype` | string | イベントのタイプ（`place` 設置 / `break` 破壊） | `actiontype=place` |
+| `player`  | string | プレイヤー名でフィルタ                         | `player=Player1` |
+| `block`   | string | ブロックID でフィルタ（例: `minecraft:stone`）| `block=minecraft:stone` |
+| `minutes` | number | 指定時間内のイベントを取得（分単位）               | `minutes=60` |
+
+### レスポンス例
+
+```json
+[
+  {
+    "time": 1766216088127,
+    "action": 0,
+    "dimension": "minecraft:overworld",
+    "location": {
+      "x": 123,
+      "y": 64,
+      "z": 456
+    },
+    "block": "minecraft:stone",
+    "player": "Player1"
+  },
+  {
+    "time": 1766216090127,
+    "action": 1,
+    "dimension": "minecraft:overworld",
+    "location": {
+      "x": 123,
+      "y": 63,
+      "z": 456
+    },
+    "block": "minecraft:dirt",
+    "player": "Player1"
+  }
+]
+```
+
+### フィールド
+
+| フィールド     | 型      | 説明                        |
+| --------- | ------ | ------------------------- |
+| `time`    | number | UNIXタイムスタンプ（ミリ秒）      |
+| `action`  | number | `0` = 設置、`1` = 破壊        |
+| `dimension` | string | ディメンション（例: `minecraft:overworld`) |
+| `location` | object | ブロックの座標                 |
+| `location.x` | number | X 座標                    |
+| `location.y` | number | Y 座標                    |
+| `location.z` | number | Z 座標                    |
+| `block`   | string | ブロックID（例: `minecraft:stone`） |
+| `player`  | string | プレイヤー名                  |
+
+### 制限
+
+- 最大 50 件までのイベントが返される
+- 複数条件での AND 検索に対応
+- タイムスタンプは直近のイベントから順に返される
+
+---
+
 ## 5. `/api/dashboard`
 
 ### 概要

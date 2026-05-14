@@ -365,6 +365,42 @@ app.get('/api/dashboard',async(req,res,next)=>{
   }
 })
 
+// BlockEvents
+app.get('/api/blockevents',async(req,res,next)=>{
+  try {
+    const {actiontype,player,block,minutes} = req.query
+    const conditions = []
+    const params = []
+    if (actiontype) {
+        conditions.push("actiontype=?")
+        params.push(type === "place" ? Logger.Types.blockevents.actiontype.PlaceBlock : Logger.Types.blockevents.actiontype.BreakBlock)
+    }
+    if (player) {
+        conditions.push("player=?")
+        params.push(player)
+    }
+    if (block) {
+        conditions.push("typeid=?")
+        params.push(block)
+    }
+    if (minutes) {
+        conditions.push("time >= ?")
+        params.push(Date.now() - (minutes * 60 * 1000))
+    }
+    const sql = `SELECT * FROM blockevents ${conditions.length ? `WHERE ${conditions.join(" AND ")}`:""} ORDER BY time DESC LIMIT 50`
+    const data = logm.db.prepare(sql).all(...params)
+    const json = data.map((v)=>{return {
+      time: new Date(v.time).getTime(),
+      action: v.actiontype,
+      dimension: v.dimension,
+      location: {x:v.x,y:v.y,z:v.z},
+      block: v.typeid,
+      player: v.player
+    }})
+    res.type("json").send(JSON.stringify(json,null,2))
+  } catch(e) {next(e)}
+})
+
 app.get('/api/nowonline', (req, res) => {
   res.type("json").send(JSON.stringify(onlinePlayer.getAll(),null,2))
 });

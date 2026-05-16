@@ -1188,46 +1188,48 @@ const LineSkipList = [
 
 // BDS line
 bds.on('line', (line) => {
+// [BSW-ADDON-ALEART]
+  if(/^\[.* INFO\] \[Scripting\] \[BSW-ADDON-ALEART\].*/.test(line)) return {skip:true}
+  
+  if (/^\[.* INFO\] \[Scripting\] \{"type":".*","cmd":".*","source":".*","data":".*","isEntity":.*\}/.test(line)) {
+    const json = JSON.parse(line.match(/\{"type":".*","cmd":".*","source":".*","data":".*","isEntity":.*\}/)[0])
 
-    if (/^\[.* INFO\] \[Scripting\] \{"type":".*","cmd":".*","source":".*","data":".*","isEntity":.*\}/.test(line)) {
-      const json = JSON.parse(line.match(/\{"type":".*","cmd":".*","source":".*","data":".*","isEntity":.*\}/)[0])
 
-
-      if (json.type == "servercommand" && json.cmd == "reloadaddon") {
-        const {source,isEntity} = json;
-        (async()=>{
-          await addon_copy()
-          bds.sendCommand("reload")
-          if (!isEntity) return {skip:true}
-          bds.sendCommand(`tellraw ${source} {"rawtext":[{"text":"§cDefaultAddonCopy & AddonReload Success"}]}`)
-        })()
-      }
-
-      if (json.type == "servercommand" && json.cmd == "backuplist") {
-        const {source,isEntity} = json;
-        (async()=>{
-          const json = await backup.getlist(source)
-          if (!isEntity) return {skip:true}
-          bds.sendCommand(`send "${JSON.stringify(json).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
-        })()
-      }
-
-      if (json.type == "Logger" && json.cmd == "playerLeave") {
-        const {source} = json;
-        const dim = json.data
-        const playername = source.replace(/\(.* .* .*\)/,"")
-        const [x, y, z] = source.replace(playername,"").replace("(","").replace(")","").split(" ").map(Number)
-        logm.PlayerLeave(playername,{x,y,z},dim)
-        return {skip:true}
-      }
-
-      if (json.type == "Request" && json.cmd == "SyncConfRequest") {
-        bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
-        return {skip:true}
-      }
+    if (json.type == "servercommand" && json.cmd == "reloadaddon") {
+      const {source,isEntity} = json;
+      (async()=>{
+        await addon_copy()
+        bds.sendCommand("reload")
+        if (!isEntity) return {skip:true}
+        bds.sendCommand(`tellraw ${source} {"rawtext":[{"text":"§cDefaultAddonCopy & AddonReload Success"}]}`)
+      })()
     }
 
-    if (LineSkipList.some(v=>v.test(line))) return {skip:true}
+    if (json.type == "servercommand" && json.cmd == "backuplist") {
+      const {source,isEntity} = json;
+      (async()=>{
+        const json = await backup.getlist(source)
+        if (!isEntity) return {skip:true}
+        bds.sendCommand(`send "${JSON.stringify(json).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
+      })()
+    }
+
+    if (json.type == "Logger" && json.cmd == "playerLeave") {
+      const {source} = json;
+      const dim = json.data
+      const playername = source.replace(/\(.* .* .*\)/,"")
+      const [x, y, z] = source.replace(playername,"").replace("(","").replace(")","").split(" ").map(Number)
+      logm.PlayerLeave(playername,{x,y,z},dim)
+      return {skip:true}
+    }
+
+    if (json.type == "Request" && json.cmd == "SyncConfRequest") {
+      bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
+      return {skip:true}
+    }
+  }
+
+  if (LineSkipList.some(v=>v.test(line))) return {skip:true}
 });
 
 let stop = false

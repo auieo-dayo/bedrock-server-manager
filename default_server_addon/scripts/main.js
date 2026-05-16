@@ -7,6 +7,8 @@ let port = NaN
 
 
 
+
+
 function btoa(str) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let result = "";
@@ -154,6 +156,12 @@ system.runInterval(()=>{
 // コマンド
 
 system.beforeEvents.startup.subscribe((ev)=>{
+    
+    // アラート
+    console.log("[BSW-ADDON-ALEART] ===========================================================")
+    console.log("[BSW-ADDON-ALEART] BSWを使用しない場合はこのアドオンを抜くことを強く推奨します")
+    console.log("[BSW-ADDON-ALEART] ===========================================================")
+
     ev.customCommandRegistry.registerCommand({
         name:"auieo:backup",
         description:"バックアップ開始指示を送ります...",

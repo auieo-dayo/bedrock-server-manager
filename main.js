@@ -1063,7 +1063,6 @@ const bm = new BanManager(root);
 
 const BetaApiEnable = {
   restart: false,
-  retryAfterRestart: false,
   enabled: false,
   run: async()=>{
     if (BetaApiEnable.enabled) return
@@ -1074,7 +1073,6 @@ const BetaApiEnable = {
     if (!await fs.exists(leveldat)) {
       console.log(chalk.green("[EnableBetaAPI] - ワールド生成前のため自動再起動と再実行を予定しました..."))
       BetaApiEnable.restart = true
-      BetaApiEnable.retryAfterRestert = true
       return
     }
     const originBuf = await fs.readFile(leveldat)
@@ -1084,7 +1082,6 @@ const BetaApiEnable = {
     if (res.isBetaApiEnabled) {
       BetaApiEnable.enabled = true
       BetaApiEnable.restart = false
-      BetaApiEnable.retryAfterRestart = false
       console.log(chalk.green("[EnableBetaAPI] - BetaAPIはオンになっています")) 
     } else {
       console.log(chalk.green("[EnableBetaAPI] - BetaAPIはオフになっています")) 
@@ -1094,7 +1091,6 @@ const BetaApiEnable = {
       await fs.rm(leveldat)
       await fs.writeFile(leveldat,enableBuf)
       BetaApiEnable.restart = false
-      BetaApiEnable.retryAfterRestart = false
     }
   }
 }
@@ -1300,7 +1296,7 @@ process.on('uncaughtException',err => {
 bds.on('close', async(code) => {
   console.log(chalk.green(`BDS終了(${code})`));
 
-  if (!stop && !BetaApiEnable.enabled) {
+  if (!stop && !BetaApiEnable.enabled && BetaApiEnable.restart) {
     BetaApiEnable.run().then(()=>bds.restart())
   }
 

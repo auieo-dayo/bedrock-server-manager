@@ -1089,12 +1089,11 @@ const BetaApiEnable = {
     } else {
       console.log(chalk.green("[EnableBetaAPI] - BetaAPIはオフになっています")) 
       const enableBuf = await betaApi.enableBetaApi(originBuf)
-      console.log(chalk.green("[EnableBetaAPI] - BetaAPIを自動でオン&再起動します")) 
+      console.log(chalk.green("[EnableBetaAPI] - BetaAPIを自動でオンします")) 
       await fs.cp(leveldat,path.join(path.dirname(leveldat),"level.dat.old"))
       await fs.rm(leveldat)
       await fs.writeFile(leveldat,enableBuf)
-      BetaApiEnable.restart = true
-      if (BetaApiEnable.retryAfterRestart) BetaApiEnable.restart = false
+      BetaApiEnable.restart = false
       BetaApiEnable.retryAfterRestart = false
     }
   }

@@ -74,7 +74,9 @@ const config = {
         // プレイヤーが抜けたときにバックアップするかどうか
         "leavePlayerBackup": true,
         // 人がいないときに自動バックアップを止めるかどうか
-        "pauseIfNoPlayer": true
+        "pauseIfNoPlayer": true,
+        // バックアップを自動で削除する日数(0の場合削除しない)
+        "autoDeleteAfterDays": 7
     },
     "webUi": {
         "port": 3000,

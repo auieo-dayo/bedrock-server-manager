@@ -401,6 +401,50 @@ class Backup {
         this.emit("restoreEnd",date)
         this.isrestoring = false
     }
+    async removeOld() {
+        // 0(オフ)か負の値ならスキップ
+        if (config.backup.autoDeleteAfterDays <= 0) return
+        const safe = new Date(Date.now() - config.backup.autoDeleteAfterDays*24*60*60*1000)
+        // this.bpath/yyyy/MM/dd/hh-mm-ss(_FULL)
+
+        // 年の比較
+        for (const year of await fs.readdir(this.bpath)) {
+            if (Number.isNaN(Number(year))) continue;
+            if (new Date(Number(year), 11, 31, 23, 59, 59, 999) < safe) {
+                await fs.remove(path.join(this.bpath,year))
+                console.log(chalk.blue(`${year}年のバックアップを削除しました`))
+                continue
+            }
+            // 月の比較
+            for(const month of await fs.readdir(path.join(this.bpath,year))) {
+                if (Number.isNaN(Number(month))) continue;
+                // 日に0を指定すると前の月の月末の日付になるから月を-1しない
+                if (new Date(Number(year), Number(month),0,23,59,59,999) < safe) {
+                    await fs.remove(path.join(this.bpath,year,month))
+                    console.log(chalk.blue(`${year}年${month}月のバックアップを削除しました`))
+                    continue
+                }
+                // 日の比較
+                for(const day of await fs.readdir(path.join(this.bpath,year,month))) {
+                    if (Number.isNaN(Number(day))) continue;
+                    if (new Date(Number(year),Number(month)-1,Number(day),23,59,59,999) < safe) {
+                        await fs.remove(path.join(this.bpath,year,month,day))
+                        console.log(chalk.blue(`${year}年${month}月${day}日のバックアップを削除しました`))
+                        continue
+                    }
+                    // 時間の比較
+                    for (const t of await fs.readdir(path.join(this.bpath,year,month,day))) {
+                        // _FULL対策とhh、mm、ssを分離
+                        const [hh,mm,ss] =t.split("_")[0].split("-")
+                        if (new Date(Number(year),Number(month)-1,Number(day),Number(hh),Number(mm),Number(ss),0) < safe) {
+                            await fs.remove(path.join(this.bpath,year,month,day,t))
+                            console.log(chalk.blue(`${year}年${month}月${day}日${hh}:${mm}:${ss}のバックアップを削除しました`))
+                        }
+                    }
+                }
+            }
+        }
+    }
     /**
      * 
      * @param {"start"|"stop"|"restoreStart"|"restoreEnd"} event 

@@ -983,33 +983,29 @@ backup.on("restoreEnd",()=>{
 
 // 自動0時フルバックアップ
 
-function scheduleDailyFullBackup() {
+function scheduleNextMidnightFullBackup() {
   if (!config.backup.enabled) return
-  const now = new Date();
-  const nextMidnight = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + 1, // 明日
-    0, 0, 0, 0         // 0時0分0秒
-  );
-  const msUntilMidnight = nextMidnight - now;
-
+  function nextTime() {
+    const next = new Date()
+    next.setHours(0,0,0,0)
+    next.setDate(next.getDate() + 1)
+    return next - new Date()
+  }
   setTimeout(async() => {
-    if (config.console.backupLogToConsole) console.log(chalk.bgMagenta("Starting daily FULL backup..."));
-    const list = await backup.waitForPreparationsComplete(bds)
-    await backup.backup(list,true, true,onlinePlayer,bds); // notskip=true, full=true
-
-    // その後は24時間ごとに繰り返す
-    setInterval(async() => {
+    try { 
       if (config.console.backupLogToConsole) console.log(chalk.bgMagenta("Starting daily FULL backup..."));
       const list = await backup.waitForPreparationsComplete(bds)
-      backup.backup(list,true, true,onlinePlayer,bds); // notskip=true, full=true
-    }, 24 * 60 * 60 * 1000);
-
-  }, msUntilMidnight);
+      await backup.backup(list,true, true,onlinePlayer,bds); // notskip=true, full=true
+      await backup.removeOld()
+    } catch(e){
+      console.error(chalk.red(`[DAYLY-FULL-BACKUP-ERROR]${e}`))
+    } finally {
+      scheduleNextMidnightFullBackup()
+    }
+  }, nextTime());
 }
 
-scheduleDailyFullBackup();
+scheduleNextMidnightFullBackup();
 
 
 

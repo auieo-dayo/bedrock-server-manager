@@ -1,4 +1,5 @@
-/* eslint-disable no-unused-vars */
+// https://github.com/auieo-dayo/bsw-dashboard-demo/ | simple | PC,スマホ用ダッシュボード
+// MIT LICENSE
 
 let bdsver = ""
 // Backup

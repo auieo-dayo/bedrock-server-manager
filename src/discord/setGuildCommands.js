@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType } = require("discord.js")
+const { ApplicationCommandOptionType, ApplicationCommandType } = require("discord.js")
 
 /**
  * @type {import("discord.js").ApplicationCommandDataResolvable[]}
@@ -172,6 +172,19 @@ const commandlist = [
         name: "debug",
         description: "debug用情報を取得します",
         defaultMemberPermissions:"Administrator",
+        options: [
+            {
+                name:"option",
+                description: "オプション",
+                required: false,
+                type: ApplicationCommandOptionType.String,
+                choices: [
+                    {name: "walCheckPoint(PASSIVE)",value:"WalCheckPoint"},
+                    {name:"Info",value:"Info"},
+                    {name:"Status",value:"Status"}
+                ]
+            }
+        ]
     }
 ]
 /**

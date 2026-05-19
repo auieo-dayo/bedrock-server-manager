@@ -151,6 +151,16 @@ class BDS {
             }
         });
     }
+    
+    isProcessAlive() {
+        const p = this.bds
+        const alive = p.exitCode === null && p.signalCode === null
+        return {
+            alive,
+            exitCode: p.exitCode,
+            signalCode: p.signalCode
+        }
+    }
 }
 
 module.exports = BDS

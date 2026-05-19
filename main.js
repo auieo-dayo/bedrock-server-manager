@@ -874,8 +874,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
   // コマンド以外ならreturn
 
   if (!interaction.isCommand()) return;
-  const { commandName, options } = interaction;
-  
+  const { commandName } = interaction;  
   // PlayerListの場合
   if (commandName == "pl" && [config.Discord.notifications.chat.channelId,config.Discord.notifications.toAdmin.channelId].includes(channel.id)) return await discordCommands.chat.pl(onlinePlayer,interaction);
 
@@ -885,27 +884,27 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
 
   // PlayerInfo
   if (commandName == "p" && config.Discord.notifications.toAdmin.playerInfo.enabled) {
-    const gamertag = options.getString("gamertag")
+    const gamertag = interaction.options.getString("gamertag")
     return await discordCommands.admin.p(bds,interaction,gamertag)
   }
   // DeathInfo
   if (commandName == "d" && config.Discord.notifications.toAdmin.deathInfo.enabled) {
-    const gamertag = options.getString("gamertag")
+    const gamertag = interaction.options.getString("gamertag")
     await discordCommands.admin.d(gamertag,interaction,channel,logm)
   }
   // Backup系
   if (commandName === "backup") {
-    const sub = options.getSubcommand();
+    const sub = interaction.options.getSubcommand();
     if (sub === "backup") {
-      const isfull = options.getBoolean("isfull")? true : false
+      const isfull = interaction.options.getBoolean("isfull")? true : false
       await interaction.deferReply({content:`${isfull ? "フル":"差分"}バックアップ中...`})
       discordCommands.admin.backup.backup(isfull,backup,interaction,bds,onlinePlayer)
     }else if (sub == "restore") {
-      const target = options.getString("target")
+      const target = interaction.options.getString("target")
       await interaction.deferReply({content:`復元中...`})
       discordCommands.admin.backup.restore(backup,target,interaction,bds)
     }else if (sub == "list") {
-      const target = options.getString("target")
+      const target = interaction.options.getString("target")
       await interaction.deferReply({content:`復元中...`})
       await discordCommands.admin.backup.list(backup,interaction,target)
     }
@@ -913,14 +912,14 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
   // Ban系
   if (commandName === "ban") {
 
-    const sub = options.getSubcommand();
+    const sub = interaction.options.getSubcommand();
     
     if (sub === "list") return await discordCommands.admin.ban.list(bm,interaction)
-    const gamertag = options.getString("gamertag")
+    const gamertag = interaction.options.getString("gamertag")
     
     if (sub === "ban") {
-      const reason = options.getString("reason")
-      const expired = options.getNumber("expired")
+      const reason = interaction.options.getString("reason")
+      const expired = interaction.options.getNumber("expired")
       let expiredtime = Date.now()
       if (expired) expiredtime+=expired*60*60*1000
       return await discordCommands.admin.ban.ban(gamertag,reason,bm,onlinePlayer,bds,interaction,{author:interaction.user.username,isdiscord:true},expired ? expiredtime : null)
@@ -933,16 +932,21 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
   }
   // Block系
   if (commandName === "block") {
-    const type = options.getString("type")
-    const player = options.getString("player")
-    const minutes = options.getInteger("minutes")
-    const block = options.getString("block")
+    const type = interaction.options.getString("type")
+    const player = interaction.options.getString("player")
+    const minutes = interaction.options.getInteger("minutes")
+    const block = interaction.options.getString("block")
     
     return await discordCommands.admin.block(interaction,type,player,block,minutes,logm)
   }
   // debug
   if (commandName == "debug") {
-    return await discordCommands.admin.debug(interaction,logm)
+    const option = interaction.options.getString("option")
+    // Info(デフォルト)
+    if (!option || option === "Info") return await discordCommands.admin.debug.default(interaction,logm);
+    if (option === "WalCheckPoint") return await discordCommands.admin.debug.walcheckpoint(logm,interaction);
+    if (option === "Status") return await discordCommands.admin.debug.status(interaction,bds.isProcessAlive().alive,BSWVer,bds.BDSver,latestbackup.time,latestbackup.isfull)
+    
   }
 })
 

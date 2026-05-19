@@ -137,7 +137,25 @@ Discord Botを設定すると、以下のアプリケーションコマンド（
 - `/block type:place player:Player1 block:diamond_ore minutes:60` - 詳細な絞り込み
 
 #### `/debug` - デバッグ情報取得
-デバッグ情報を取得します
+デバッグ情報を取得します。
+
+**オプション:**
+- **status** - サーバー稼働状況
+  - BDS稼働状況（🟢オンライン/🔴オフライン）
+  - BDSバージョン
+  - BSWバージョン
+  - 最新バックアップ情報と種別（FULL/Diff）
+
+- **default** - システムリソース情報
+  - CPU使用率とCPUモデル
+  - メモリ使用率と空き容量
+  - システムアップタイム
+  - BSWアップタイム
+  - DBイベント件数
+
+- **walcheckpoint** - WALチェックポイント実行
+  - SQLiteのWALチェックポイントを実行（PASSIVE モード）
+  - 保存完了数とBusy状態の情報を表示
 
 
 ---

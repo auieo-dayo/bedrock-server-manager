@@ -21,7 +21,8 @@ const Types = {
 
 class Logger {
     constructor (dbpath) {
-        this.db = new Database(dbpath)
+        this.dbpath = dbpath
+        this.db = new Database(this.dbpath)
         // WALモードに
         this.db.exec(`PRAGMA journal_mode = WAL;`)
         

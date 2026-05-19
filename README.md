@@ -48,9 +48,8 @@ BSW はワールド起動時に **Minecraft Scripting BetaAPI** の状態を自�
   - その後サーバーが自動再起動し、BetaAPI が有効な状態で起動します
 
 ### 技術的詳細
-- `level.dat` 内のバイナリ構造を解析・修正して BetaAPI を有効化
+- `level.dat` を修正し、BetaAPI を有効化
 - 元の `level.dat` は `level.dat.old` としてバックアップされます
-- この処理は起動時のみ実行されるため、運用中は BetaAPI の状態が保持されます
 
 ## 設定
 - `config.js`：BSW の動作設定（WebUI, Discord, backup 等）

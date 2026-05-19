@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType, ApplicationCommandType } = require("discord.js")
+const { ApplicationCommandOptionType } = require("discord.js")
 
 /**
  * @type {import("discord.js").ApplicationCommandDataResolvable[]}

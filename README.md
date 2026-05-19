@@ -3,6 +3,11 @@
 
 BSW は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールです。サーバー設定の同期、ログ収集、バックアップ、自動通知、Web ダッシュボード、WebSocket コンソールなどを提供します。
 
+## ライセンス
+
+ ### MIT LICENSE
+ ### [ダッシュボードで使用しているフォント、アイコンのライセンスはこちら](/THIRD_PARTY_LICENSES.md)
+
 
 ## 概要
 - server.properties の同期

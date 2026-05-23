@@ -373,7 +373,7 @@ app.get('/api/blockevents',async(req,res,next)=>{
     const params = []
     if (actiontype) {
         conditions.push("actiontype=?")
-        params.push(type === "place" ? Logger.Types.blockevents.actiontype.PlaceBlock : Logger.Types.blockevents.actiontype.BreakBlock)
+        params.push(actiontype === "place" ? Logger.Types.blockevents.actiontype.PlaceBlock : Logger.Types.blockevents.actiontype.BreakBlock)
     }
     if (player) {
         conditions.push("player=?")

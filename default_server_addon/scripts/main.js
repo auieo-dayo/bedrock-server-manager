@@ -70,6 +70,11 @@ function post(body,retry=0) {
 }
 
 
+function syncPlayer() {
+    const players = world.getAllPlayers().map((p)=>({"name":p.name,"tags":p.getTags()}))
+    post({"type":"syncplayerlist","data": players})
+}
+
 // プレイヤー退出ログ
 
 world.beforeEvents.playerLeave.subscribe((ev)=>{
@@ -144,12 +149,7 @@ world.beforeEvents.playerBreakBlock.subscribe((ev)=>{
 
 // プレイヤーリスト同期
 system.runInterval(()=>{
-    const playerlist = world.getAllPlayers()
-    const players = playerlist.map((p)=>{
-        const json = {"name":p.name,"tags":p.getTags()}
-        return json
-    })
-    post({"type":"syncplayerlist","data": players})
+    syncPlayer()
 },20*60*10)
 
 

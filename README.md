@@ -26,7 +26,7 @@ BSW は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールで�
 - WebSocket: [docs/Websocket.md](docs/Websocket.md)
 
 ## 必要条件
-- Node.js 18 以上
+- Node.js 22 以上
 - BDS（Bedrock Dedicated Server）をbds/に配置しておくこと
 
 ## セットアップ

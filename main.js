@@ -281,8 +281,10 @@ app.get('/api/getbdspw', async (req, res, next) => {
 
 app.get('/api/getlog', async (req, res, next) => {
   try {
-    const {limit = 300} = req.query
-    if (typeof limit !== "number") limit=300
+    const {_l} = req.query
+    let limit = Number(_l)
+    if (Number.isNaN(limit)) limit=300
+    if (limit <= 0 || limit > 1000) limit = 1000
     const prepare = logm.db.prepare(`SELECT * FROM events ORDER BY time DESC LIMIT ?`)
     const content = prepare.all(Number(limit))
     

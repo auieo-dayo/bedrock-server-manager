@@ -163,6 +163,7 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 | `interval`     | number | バックアップの実行間隔（分）                    |
 | `pauseIfNoPlayer` | boolean | プレイヤーがいない時にバックアップを停止するか    |
 | `leavePlayerBackup` | boolean | プレイヤーが抜けたときにバックアップするか |
+| `autoDeleteAfterDays` | number | 自動バックアップを保持する日数。`0` の場合は削除しません |
 
 ### 設定例
 
@@ -171,7 +172,8 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
     "enabled": true,
     "interval": 30,
     "leavePlayerBackup": true,
-    "pauseIfNoPlayer": true
+    "pauseIfNoPlayer": true,
+    "autoDeleteAfterDays": 7
 }
 ```
 

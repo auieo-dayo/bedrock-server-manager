@@ -373,7 +373,9 @@ class Backup {
             console.log(chalk.bgGreen(`Start:${applyList[0].fullpath} to End:${applyList[applyList.length-1].fullpathja}`))
             const worldspath = path.join(this.BDS, "worlds");
             const restorePath = path.join(worldspath,`${this.worldname}_tmp`);
-            await fs.rename(path.join(worldspath,this.worldname),path.join(worldspath,`${this.worldname}_old_${Date.now()}`))
+            try {
+                await fs.rename(path.join(worldspath,this.worldname),path.join(worldspath,`${this.worldname}_old_${Date.now()}`))
+            } catch(e){console.warn(e)}
 
             // // 一旦消す
             // try {

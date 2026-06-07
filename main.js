@@ -254,11 +254,13 @@ const limit = rateLimit({
 app.use('/',limit)
 
 //  Basic
-app.use('/', basicAuth({
-  users: { [config.webUi.username ?? "admin"] : config.webUi.password ?? "admin" },
-  challenge: true,           // 認証ダイアログを出す
-  realm: 'BSW-DashBoard-Login'         // ダイアログに表示される領域名
-}));
+if (config.webUi.basicAuth.enable) {
+  app.use('/', basicAuth({
+    users: { [config.webUi.username ?? "admin"] : config.webUi.password ?? "admin" },
+    challenge: true,           // 認証ダイアログを出す
+    realm: 'BSW-DashBoard-Login'         // ダイアログに表示される領域名
+  }));
+} else console.log(chalk.bgGreen("[WEB] DISABLED BASICAUTH"))
 
 app.get('/api/getwstoken',(req,res,next)=>{
   try {
@@ -429,7 +431,7 @@ app.get('/api/backuplist', async(req, res, next) => {
 app.use(express.static(path.join(root,"www")))
 
 app.use((err, req, res,next) => {
-  console.error(chalk.red('[WEB-ERROR]'), err);
+  console.error(chalk.red('[WEB ERROR]'), err);
   if (res.headersSent) return next(err);
     res.status(500).json({
       error: 'internal_error',

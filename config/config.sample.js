@@ -79,9 +79,17 @@ const config = {
         "autoDeleteAfterDays": 7
     },
     "webUi": {
+        // ダッシュボードを公開するポート
         "port": 3000,
-        "username":"admin",
-        "password":"admin",
+
+        "basicAuth": {
+            // ダッシュボードに認証を使用するか
+            "enable": true,
+            // ダッシュボードにアクセスするためのユーザーネーム
+            "username":"admin",
+            // ダッシュボードにアクセスするためのパスワード
+            "password":"admin"
+        },
         // リバースプロキシを信頼するか(boolean | number)
         "trustProxy": false
     }

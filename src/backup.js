@@ -331,75 +331,80 @@ class Backup {
     }
 
     async restore(target) {
-        await this.waitForBackupEnd()
-        if (this.isrestoring) return
-        const backups = (await this.getlist("",true)).data
+        try {
+            await this.waitForBackupEnd()
+            if (this.isrestoring) return
+            const backups = (await this.getlist("",true)).data
 
-        const date = new Date(target)
+            const date = new Date(target)
 
-        console.log(chalk.bgGreen("StartRestore from Backups..."))
-        const datetext = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} - ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-        console.log(chalk.bgGreen(`Target:${datetext}`))
-        this.emit("restoreStart",date)
-        this.isrestoring = true
+            console.log(chalk.bgGreen("StartRestore from Backups..."))
+            const datetext = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} - ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+            console.log(chalk.bgGreen(`Target:${datetext}`))
+            this.emit("restoreStart",date)
+            this.isrestoring = true
 
-        // Fullからtargetまでのバックアップを取る
-        const list = backups.fullbackuplist
-        .filter(b => {
-            const d = new Date(
-            b.date.yyyy, b.date.MM - 1, b.date.dd,
-            b.date.hh, b.date.mm, b.date.ss
-            );
-            return d <= date;
-        })
-        .sort((a, b) => {
-            const da = new Date(a.date.yyyy, a.date.MM - 1, a.date.dd, a.date.hh, a.date.mm, a.date.ss);
-            const db = new Date(b.date.yyyy, b.date.MM - 1, b.date.dd, b.date.hh, b.date.mm, b.date.ss);
-            return da - db;
-        });
-
-
-        // 一番近いFULL
-        const startIndex = list.map(v => v.full).lastIndexOf(true);
+            // Fullからtargetまでのバックアップを取る
+            const list = backups.fullbackuplist
+            .filter(b => {
+                const d = new Date(
+                b.date.yyyy, b.date.MM - 1, b.date.dd,
+                b.date.hh, b.date.mm, b.date.ss
+                );
+                return d <= date;
+            })
+            .sort((a, b) => {
+                const da = new Date(a.date.yyyy, a.date.MM - 1, a.date.dd, a.date.hh, a.date.mm, a.date.ss);
+                const db = new Date(b.date.yyyy, b.date.MM - 1, b.date.dd, b.date.hh, b.date.mm, b.date.ss);
+                return da - db;
+            });
 
 
-        if (startIndex === -1) {
-            throw new Error("FULL backup not found");
-        }
+            // 一番近いFULL
+            const startIndex = list.map(v => v.full).lastIndexOf(true);
 
-        const applyList = list.slice(startIndex);
 
-        console.log(chalk.bgGreen(`Start:${applyList[0].fullpath} to End:${applyList[applyList.length-1].fullpathja}`))
-        const worldspath = path.join(this.BDS, "worlds");
-        const restorePath = path.join(worldspath,`${this.worldname}_tmp`);
-
-        // // 一旦消す
-        // try {
-        //     await fs.remove(restorePath);
-        // } catch (err) {
-        //     console.error("[Restore -Error] ", err && err.stack ? err.stack : err);
-        // }
-        
-        await fs.remove(restorePath)
-        await fs.ensureDir(restorePath);
-
-        for (const backup of applyList) {
-            const dir = path.join(this.bpath, backup.fullpath);
-            const files = await getAllFiles(dir);
-
-            for (const file of files) {
-                const src = path.join(dir, file);
-                const dest = path.join(restorePath, file);
-
-                await fs.ensureDir(path.dirname(dest));
-                await fs.copy(src, dest);
+            if (startIndex === -1) {
+                throw new Error("FULL backup not found");
             }
+
+            const applyList = list.slice(startIndex);
+
+            console.log(chalk.bgGreen(`Start:${applyList[0].fullpath} to End:${applyList[applyList.length-1].fullpathja}`))
+            const worldspath = path.join(this.BDS, "worlds");
+            const restorePath = path.join(worldspath,`${this.worldname}_tmp`);
+            await fs.rename(path.join(worldspath,this.worldname),path.join(worldspath,`${this.worldname}_old_${Date.now()}`))
+
+            // // 一旦消す
+            // try {
+            //     await fs.remove(restorePath);
+            // } catch (err) {
+            //     console.error("[Restore -Error] ", err && err.stack ? err.stack : err);
+            // }
+            
+            await fs.remove(restorePath)
+            await fs.ensureDir(restorePath);
+
+            for (const backup of applyList) {
+                const dir = path.join(this.bpath, backup.fullpath);
+                const files = await getAllFiles(dir);
+
+                for (const file of files) {
+                    const src = path.join(dir, file);
+                    const dest = path.join(restorePath, file);
+
+                    await fs.ensureDir(path.dirname(dest));
+                    await fs.copy(src, dest);
+                }
+            }
+            await fs.rename(restorePath,path.join(worldspath,this.worldname))
+            console.log(chalk.bgGreen(`Completed Restore from Backups`))
+            this.emit("restoreEnd",date)
+            this.isrestoring = false
+        }catch(e){
+            this.isrestoring = false
+            throw new Error(e)
         }
-        await fs.rename(path.join(worldspath,this.worldname),path.join(worldspath,`${this.worldname}_old_${Date.now()}`))
-        await fs.rename(restorePath,path.join(worldspath,this.worldname))
-        console.log(chalk.bgGreen(`Completed Restore from Backups`))
-        this.emit("restoreEnd",date)
-        this.isrestoring = false
     }
     async removeOld() {
         // 0(オフ)か負の値ならスキップ

@@ -1,0 +1,46 @@
+@font-face {
+  font-family: "KiwiMaru";
+  src:
+    local("KiwiMaru"),
+    url("./KiwiMaru-Light.ttf") format("truetype")
+}
+
+
+
+body {
+    margin:0;
+    padding: 0;
+    background-color: rgb(217, 243, 247);
+}
+* {
+    font-family: "KiwiMaru",sans-serif;
+    animation: floatin ease 1s;
+}
+
+header {
+    background-color: rgb(163, 200, 233);
+}
+header h1,header p {
+    margin: 0;
+    transition: .3s;
+}
+header h1:hover,header p:hover {
+    color: rgb(97, 97, 97);
+}
+
+.section {
+    text-align: center;
+
+}
+
+/* 表示アニメーション */
+@keyframes floatin {
+    0%{
+        opacity: 0;
+        transform: translateY(-15%);
+    }
+    100%{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

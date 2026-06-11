@@ -2,13 +2,18 @@ const { EmbedBuilder } = require("discord.js");
 const { Types } =require("../../logger");
 const { formatDate } = require("../../formatDate");
 
-async function block(message,type,player,block,minutes,logm) {
+async function block(message,type,player,block,minutes,logm,dontskipTnt=false) {
     const conditions = []
     const params = []
 
     if (type) {
         conditions.push("actiontype=?")
-        params.push(type === "place" ? Types.blockevents.actiontype.PlaceBlock : Types.blockevents.actiontype.BreakBlock)
+        if (type === "place") params.push(Types.blockevents.actiontype.PlaceBlock);
+        if (type === "break") params.push(Types.blockevents.actiontype.BreakBlock);
+        if (type === "explode") params.push(Types.blockevents.actiontype.ExplodeBlock);
+    } else if (!dontskipTnt) {
+        conditions.push("actiontype != ?")
+        params.push(Types.blockevents.actiontype.ExplodeBlock)
     }
     if (player) {
         conditions.push("player=?")
@@ -34,7 +39,11 @@ async function block(message,type,player,block,minutes,logm) {
         
         data.forEach((v)=>{
             const time = new Date(v.time)
-            const Type = v.actiontype === Types.blockevents.actiontype.PlaceBlock ? "設置" : "破壊"
+            let Type = "不明"
+            if (v.actiontype === Types.blockevents.actiontype.PlaceBlock) Type = "設置"
+            if (v.actiontype === Types.blockevents.actiontype.BreakBlock) Type = "破壊"
+            if (v.actiontype === Types.blockevents.actiontype.ExplodeBlock) Type = "爆発"
+            
             const dim = v.dimension
             const {player,typeid,x,y,z} = v
             md+=`- ${formatDate(time)}に、${player}が${typeid}を**${Type}**した\n-# (\`${num(x)} ${num(y)} ${num(z)}(${dim})\`)。\n\n`

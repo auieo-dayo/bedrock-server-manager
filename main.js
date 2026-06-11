@@ -223,12 +223,14 @@ app.post('/api/bds/send',async (req,res,next)=>{
         break;
       }
       case "blockEvent": {
-        if (![0,1].includes(body.action)) return res.status(400).type("json").send({"status":false});
+        if (![0,1,2].includes(body.action)) return res.status(400).type("json").send({"status":false});
 
-        const {typeid,dim,player,location,action} = body
+        const {dim,source,location,action} = body
+        const typeid = body.typeid
 
-        if (action === 0) logm.PlaceBlock(player,typeid,dim,location)
-        if (action === 1) logm.BreakBlock(player,typeid,dim,location)
+        if (action === 0) logm.PlaceBlock(source,typeid,dim,location)
+        if (action === 1) logm.BreakBlock(source,typeid,dim,location)
+        if (action === 2) logm.ExplodeBlock(source,dim,location,body.blocks)
         res.status(200).type("json").send({"status":true})
         break;
       }
@@ -940,8 +942,9 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     const player = interaction.options.getString("player")
     const minutes = interaction.options.getInteger("minutes")
     const block = interaction.options.getString("block")
-    
-    return await discordCommands.admin.block(interaction,type,player,block,minutes,logm)
+    const dontskiptnt = interaction.options.getBoolean("dontskiptnt")
+
+    return await discordCommands.admin.block(interaction,type,player,block,minutes,logm,dontskiptnt)
   }
   // debug
   if (commandName == "debug") {

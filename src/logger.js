@@ -14,7 +14,8 @@ const Types = {
     blockevents: {
         actiontype: {
             PlaceBlock:0,
-            BreakBlock:1
+            BreakBlock:1,
+            ExplodeBlock:2
         }
     }
 }
@@ -43,8 +44,8 @@ class Logger {
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_events_type_time ON events(type, time);`)
 
         // ブロック
-        // actiontypeが0はplace、1はbleak
-        // dimensionの0がoverworld、1がnether、2がthe_end
+        // actiontypeが0はplace、1はbleak、2はTNTによる破壊
+        // dimensionはID
         this.db.exec(`CREATE TABLE IF NOT EXISTS blockevents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             actiontype INTEGER NOT NULL,
@@ -153,7 +154,7 @@ class Logger {
      */
     PlaceBlock(player,typeid,dimension,location) {
         for (const v of Object.entries(location)) {if (typeof v[1] !== "number") throw new Error(`${v[1]} is not number(location:${v[0]})`)}
-        if (typeof typeid !== "string") throw new Error(`${typeid} is not string(player)`)
+        if (typeof typeid !== "string") throw new Error(`${typeid} is not string(typeid)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`)
         prepare.run(Date.now(),Types.blockevents.actiontype.PlaceBlock,player,typeid,dimension,location.x,location.y,location.z)  
@@ -167,12 +168,38 @@ class Logger {
      */
     BreakBlock(player,typeid,dimension,location) {
         for (const v of Object.entries(location)) {if (typeof v[1] !== "number") throw new Error(`${v[1]} is not number(location:${v[0]})`)}
-        if (typeof typeid !== "string") throw new Error(`${typeid} is not string(player)`)
+        if (typeof typeid !== "string") throw new Error(`${typeid} is not string(typeid)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`)
         prepare.run(Date.now(),Types.blockevents.actiontype.BreakBlock,player,typeid,dimension,location.x,location.y,location.z)  
     }
 
+    /**
+     * @param {string} source 
+     * @param {string} dimension 
+     * @param {{x:number,y:number,z:number}} location
+     * @param {{typeid:string,location:{x:number,y:number,z:number}}[]} blocks 
+     */
+    ExplodeBlock(source,dimension,location,blocks) {
+        if (!Array.isArray(blocks)) throw new Error(`${blocks} is not array(Blocks)`)
+        // if (typeof typeid !== "string") throw new Error(`${typeid} is not string(player)`)
+        if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
+        
+        // 追加してく
+        const date = Date.now()
+        const insert = this.db.transaction((blocks) => {
+            const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`);
+            for (const block of blocks) {
+                if (typeof block.location.x !== "number") throw new Error(`${block.location.x} is not number(blocks[].location:x)`);
+                if (typeof block.location.y !== "number") throw new Error(`${block.location.y} is not number(blocks[].location:y)`);
+                if (typeof block.location.z !== "number") throw new Error(`${block.location.z} is not number(blocks[].location:z)`);
+                if (typeof block.typeid !== "string") throw new Error(`${block.typeid} is not string(blocks[].typeid)`)
+
+                prepare.run(date,Types.blockevents.actiontype.ExplodeBlock,source,block.typeid,dimension,block.location.x,block.location.y,block.location.z)  
+            }
+        })
+        insert(blocks)
+    }
 }
 
 module.exports = {Logger,Types}

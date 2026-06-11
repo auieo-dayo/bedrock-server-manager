@@ -148,6 +148,7 @@ const commandlist = [
                 choices: [
                     {name: "設置",value: "place"},
                     {name: "破壊",value: "break"},
+                    {name: "爆発による破壊",value: "explode"}
                 ],
             },
             {
@@ -165,6 +166,11 @@ const commandlist = [
                 name: "minutes",
                 description: "時間で絞り込み(分)",
                 type: ApplicationCommandOptionType.Integer
+            },
+            {
+                name: "dontskiptnt",
+                description: "TNTのログををスキップしない",
+                type:ApplicationCommandOptionType.Boolean
             }
         ]
     },

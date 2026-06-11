@@ -131,7 +131,7 @@ world.afterEvents.playerPlaceBlock.subscribe((ev)=>{
         action:0,
         typeid: ev.block.typeId,
         dim: ev.dimension.id,
-        player: ev.player.name,
+        source: ev.player.name,
         location: ev.block.location
     })
 })
@@ -142,8 +142,24 @@ world.beforeEvents.playerBreakBlock.subscribe((ev)=>{
         action:1,
         typeid: ev.block.typeId,
         dim: ev.dimension.id,
-        player: ev.player.name,
+        source: ev.player.name,
         location: ev.block.location
+    })
+})
+
+world.beforeEvents.explosion.subscribe((ev)=>{
+    const explosionMob = ev.source
+    const explosionPosition = ev.source.location
+    const blocks = ev.getImpactedBlocks().map((v)=>({typeid:v.typeId,location:v.location})).filter((v)=>v.typeid !== "minecraft:air")
+
+    post({
+        type:"blockEvent",
+        action:2,
+        // typeid: ev.block.typeId,
+        dim: ev.dimension.id,
+        source: explosionMob.typeId,
+        location: explosionMob.location,
+        blocks
     })
 })
 

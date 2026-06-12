@@ -1,0 +1,8 @@
+BDS を公式サイトからダウンロードし、
+このフォルダ(bds)内に展開してください。
+
+ダウンロード:
+https://www.minecraft.net/ja-jp/download/server/bedrock
+
+展開後、このフォルダ内に bedrock_server.exe
+(Linuxの場合は bedrock_server) が存在する状態にしてください。

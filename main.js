@@ -1143,7 +1143,7 @@ bds.on("started",()=>{
   }
   if (discordstarted) sendStartEmbed()
   if (config.Discord.enabled) client.login(config.Discord.TOKEN);
-  bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`)
+  bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
   // Backup
   backup.waitForPreparationsComplete(bds).then((list)=>{
     backup.backup(list,false,true,onlinePlayer,bds)
@@ -1184,8 +1184,8 @@ bds.on("leave",(json)=>{
 // SKIPLIST
 
 const LineSkipList = [
-  /^[.* INFO] Saving\.\.\./,
-  /^[.* INFO] Changes to the world are resumed\./
+  /^\[.* INFO\] Saving\.\.\./,
+  /^\[.* INFO\] Changes to the world are resumed\./
 ]
 
 // BDS line

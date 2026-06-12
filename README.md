@@ -37,7 +37,6 @@ npm install
 ```
 
 2. BDS をダウンロードし、リポジトリルートに `bds` フォルダを置く
-3. `bds/worlds/world` を作成（ワールド配置用）
 
 ## BetaAPI について
 

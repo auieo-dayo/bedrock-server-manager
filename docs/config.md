@@ -44,6 +44,7 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 | ------ | ------ | -------------------- |
 | `TOKEN` | string | Discord Bot トークン   |
 | `enabled` | boolean | Discord連携を有効化するか |
+| `guildId` | string | Discordサーバー（ギルド）ID |
 
 ### notifications（通知設定）
 
@@ -181,15 +182,16 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 
 ## 4. webUi（Web UI設定）
 
-Web管理画面にアクセスする際の設定です。
+Web管理画面にアクセスする際の設定です。`webUi` 内で `basicAuth` を設定できます。
 
 ### プロパティ
 
 | プロパティ    | 型      | 説明                    |
 | --------- | ------ | --------------------- |
 | `port`    | number | Web UIのポート番号（デフォルト3000） |
-| `username` | string  | ログインユーザー名           |
-| `password` | string  | ログインパスワード           |
+| `basicAuth.enable` | boolean | ベーシック認証を有効化するか |
+| `basicAuth.username` | string  | ログインユーザー名           |
+| `basicAuth.password` | string  | ログインパスワード           |
 | `trustProxy` | boolean \| number | リバースプロキシを信頼するか（boolean または信頼するホップ数） |
 
 ### 設定例
@@ -197,8 +199,11 @@ Web管理画面にアクセスする際の設定です。
 ```javascript
 "webUi": {
     "port": 3000,
-    "username":"admin",
-    "password":"admin",
+    "basicAuth": {
+        "enable": true,
+        "username":"admin",
+        "password":"admin"
+    },
     "trustProxy": false
 }
 ```

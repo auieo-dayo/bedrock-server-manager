@@ -10,15 +10,19 @@
 body {
     margin:0;
     padding: 0;
-    background-color: rgb(217, 243, 247);
+    background-color: #d9f3f7;
 }
 * {
     font-family: "KiwiMaru",sans-serif;
     animation: floatin ease 1s;
+    scrollbar-color: #a55b5b #d9f3f7;
+    
 }
 
 header {
     background-color: rgb(163, 200, 233);
+    padding-bottom: 5vh;
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 header h1,header p {
     margin: 0;
@@ -28,9 +32,121 @@ header h1:hover,header p:hover {
     color: rgb(97, 97, 97);
 }
 
+footer {
+    background-color: rgb(163, 200, 233);
+    padding-top: 5vh;
+    mask-image: linear-gradient(to top, black 70%, transparent 100%);
+}
+footer h1 {
+    margin: 0;
+    text-align: center;
+}
+
+
 .section {
     text-align: center;
+    word-break: break-word;
+}
 
+#funcAbout  {
+    width: max-content;
+    max-width: 80%;
+    margin: auto;
+    word-break: break-word;
+    margin-bottom: 100px;
+    padding-bottom: 100px;
+    border-bottom: 3px dashed #000;
+}
+#funcAbout li ul li{
+    list-style-type: circle;
+    margin-bottom: 20px;
+}
+#funcAbout li h2 span::before {
+    content: " / ";
+}
+h3 {
+    border-bottom: 2px dashed #000;
+    width: max-content;
+    padding-left: 20px;
+    padding-right: 20px;
+    word-break: break-word;
+}
+#funcAbout h2 {
+    width: max-content;
+    background: linear-gradient(transparent 55%, #ffeb3b 55%);
+    border-radius: 2px;
+    margin: 0;
+    
+}
+.green {
+    background: linear-gradient(transparent 55%, #98fd25 55%);
+    border-radius: 2px;
+}
+
+#btn {
+    width: max-content;
+    margin: auto;
+    border: 2px dashed #000;
+    font-size: xx-large;
+    width: 50vw;
+    background-color: #92ace2;
+    margin-left: 25vw;
+    height: 30vh;
+    transition: 300ms;
+    display: inline-block;
+}
+#btn:hover {
+    scale: 1.1;
+}
+#btn:active {
+    background-color: #f5e55952;
+}
+
+
+@media (max-width: 1024px)  {
+    #funcAbout {
+        list-style-type: none;
+        width: 100vw;
+        max-width: 100vw;
+        padding: 0;
+        margin: 0;
+        margin-bottom: 100px;
+        padding-bottom: 100px;
+    }
+    #funcAbout h2 {
+        width: max-content;
+        max-width: 90vw;
+        margin: auto;
+        background: none;
+        border-bottom: #ffeb3b 5px solid;
+        margin-bottom: 20px;
+    }
+    
+    h3 {
+        padding: 0;
+        width: max-content;
+        max-width: 100vw;
+    }
+    #funcAbout li ul li{
+        list-style-type: none;
+    }
+    #funcAbout li ul li::before {
+        content: "- ";
+        font-weight: bold;
+    }
+
+    #btn {
+        width: 80vw;
+        margin: 10vw;
+    }
+    #btn:hover {
+        scale: 1;
+        border: 10px solid #ff3f3f;
+    }
+    
+    footer h1 {
+        font-size: medium;
+    }
 }
 
 /* 表示アニメーション */

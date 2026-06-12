@@ -9,10 +9,73 @@
 </head>
 <body>
     <header class="noanim">
-        <h1 style="text-align: center;" >BSW</h1>
+        <h1 style="text-align: center;" onclick="window.open('https://github.com/auieo-dayo/bedrock-server-wrapper')" >BSW</h1>
         <p style="text-align: center;">Bedrock-Server-Wrapper</p>
     </header>
-    <h2 class="section">機能紹介</h2>
-    <p></p>
+    <h1 class="section"><a href="https://github.com/auieo-dayo/bedrock-server-wrapper" target="_blank">BSW</a>とは何をするためのもの？</h1>
+    <p style="text-align: center;"><a href="https://github.com/auieo-dayo/bedrock-server-wrapper" target="_blank">BSW</a>は<a href="https://www.minecraft.net/ja-jp/download/server/bedrock" target="_blank">BDS<span style="font-size: xx-small;">(Bedrock-Dedicated-Server)</span></a>をNode.jsで管理・運用するための統合ツール！</p>
+    <p>ディスコードやWebダッシュボードで管理できるやつ！</p>
+
+    <h1 class="section" style="border-top: 2px dashed #00000028;">機能紹介</h1>
+
+    <ul id="funcAbout">
+        <li>
+            <h2>サーバー管理・ログ収集</h2>
+            <ul>
+                <li>server.propertiesの一部の設定を.env で同期</li>
+                <li>チャットログ、死亡ログ、プレイヤー入退室ログ、ブロックの設置,破壊,TNTによる破壊ログ等を収集</li>
+            </ul>
+        </li>
+
+        <li>
+            <h2>バックアップ</h2>
+            <ul>
+                <li>差分バックアップの自動実行</li>
+                <li>1日/1回の自動フルバックアップ</li>
+                <li>プレイヤーがいないときのバックアップ停止や、退出時バックアップ</li>
+                <li>指定日数で古いバックアップを自動削除</li>
+            </ul>
+        </li>
+
+        <li>
+            <h2>Webダッシュボード<span>RESTAPI</span><span>WebSocket</span></h2>
+            <ul>
+                <li>リアルタイムログの取得</li>
+                <li>コマンドを送信</li>
+                <li>過去ログ、プレイヤーリスト、サーバー情報等を取得</li>
+            </ul>
+        </li>
+
+        <li>
+            <h2>Discord 連携</h2>
+            <ul>
+                <h3 class="green">チャット、管理者チャンネル共通</h3>
+                <li>双方向のチャット連携</li>
+                <li>プレイヤーリスト取得</li>
+
+                <h3 class="green">管理者チャンネル専用</h3>
+                <li>特定プレイヤーの現在の情報を取得(座標や持っているアイテム、HP、ゲームモードなど)</li>
+                <li>過去10件の死亡履歴取得(座標付き)</li>
+                <li>BAN、BAN解除等の処理(期限付きも可能)</li>
+                <li>手動でバックアップ実行</li>
+                <li>バックアップからのリストア</li>
+                <li>ブロック破壊、設置、TNTによる破棄のログを取得(フィルター付き)</li>
+            </ul>
+        </li>
+    </ul>
+
+    <button id="btn" onclick="window.open('https://github.com/auieo-dayo/bedrock-server-wrapper')">GitHubでBSWを開く</button>
+
+    <h1 class="section">その他ドキュメント</h1>
+    <ul style="width: max-content;max-width: 100vw;margin: auto;">
+        <li>READMEドキュメント:<a target="_blank" href="https://github.com/auieo-dayo/bedrock-server-wrapper/blob/main/README.md">README.md</a></li>
+        <li>APIドキュメント:<a target="_blank" href="https://github.com/auieo-dayo/bedrock-server-wrapper/blob/main/docs/API.md">API.md</a></li>
+        <li>configドキュメント:<a target="_blank" href="https://github.com/auieo-dayo/bedrock-server-wrapper/blob/main/docs/config.md">config.md</a></li>
+        <li>envドキュメント:<a target="_blank" href="https://github.com/auieo-dayo/bedrock-server-wrapper/blob/main/docs/env.md">env.md</a></li>
+        <li>WebSocketドキュメント:<a target="_blank" href="https://github.com/auieo-dayo/bedrock-server-wrapper/blob/main/docs/Websocket.md">Websocket.md</a></li>
+    </ul>
+    <footer>
+        <h1>© 2026 <a target="_blank" href="https://github.com/auieo-dayo">auieo-dayo</a>. Licensed under the MIT License.</h1>
+    </footer>
 </body>
 </html>

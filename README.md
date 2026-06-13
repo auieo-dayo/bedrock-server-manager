@@ -1,14 +1,14 @@
 
-# BSW (Bedrock Server Wrapper)
+# BSW(Bedrock Server Wrapper)
 
-BSW は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールです。サーバー設定の同期、ログ収集、バックアップ、自動通知、Web ダッシュボード、WebSocket コンソールなどを提供します。
+BSW は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールです。サーバー設定の同期、ログ収集、バックアップ、自動通知、Webダッシュボード、WebSocketコンソールなどを提供します。
 
 これによってマイクラ統合版サーバーの管理が三倍楽になります。(体感)
 
 ## ライセンス
 
  ### MIT LICENSE
- ### [ダッシュボードで使用しているフォント、アイコンのライセンスはこちら](/THIRD_PARTY_LICENSES.md)
+ ### [ダッシュボードなどで使用しているフォント、アイコンのライセンスはこちら](/THIRD_PARTY_LICENSES.md)
 
 
 ## 概要
@@ -16,7 +16,7 @@ BSW は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールで�
 - チャットログ・死亡ログの収集
 - Discord への通知（設定時）
 - 自動バックアップ（差分）
-- Web ダッシュボードと REST API
+- Web ダッシュボードと RESTAPI
 - WebSocket によるリアルタイムログ/コマンド送信
 
 ## ドキュメント
@@ -40,27 +40,25 @@ npm install
 
 ## BetaAPI について
 
-BSW はワールド起動時に **Minecraft Scripting BetaAPI** の状態を自動判定・管理します。
+BSW はワールド起動時に **BetaAPI** の状態を自動判定・管理します。
 
 ### 初回起動時の挙動
 - **ワールドが存在しない場合**: ワールド初期生成の後、自動再起動時に BetaAPI を有効にします
-- **既存ワールドを配置した場合**: 
+- **既存のワールドを配置した場合**: 
   - BetaAPI が無効な場合、自動的に `level.dat` を書き換えて BetaAPI を有効化
   - その後サーバーが自動再起動し、BetaAPI が有効な状態で起動します
 
-### 技術的詳細
-- `level.dat` を修正し、BetaAPI を有効化
-- 元の `level.dat` は `level.dat.old` としてバックアップされます
+> - 元の `level.dat` は `level.dat.old` としてバックアップされます
 
 ## 設定
-- `config.js`：BSW の動作設定（WebUI, Discord, backup 等）
+- `config.js`：BSW の設定（WebUI, Discord, backup 等）
 詳しくは[docs/config.md](docs/config.md) を参照してください。
 
-- `.env`：BDS の `server.properties` に対応する環境変数（`server-name`, `gamemode`, `level-name` など）
+- `.env`：BDS の `server.properties` に対応する設定（`server-name`, `gamemode`, `level-name` など）
 詳しくは[docs/env.md](docs/env.md) を参照してください。
 
 
-（既存の README のサンプル `config.js` / `.env` 設定はこのリポジトリ内に含まれています）
+（`config.js` / `.env`の設定サンプルはこのリポジトリ内に含まれています）
 
 ## 起動
 
@@ -72,9 +70,8 @@ npm start
 
 ## Discord コマンド
 
-Discord Botを設定すると、以下のアプリケーションコマンド（スラッシュコマンド）が使用可能になります。
+Discord Bot用のトークン等 を設定すると、以下のアプリケーションコマンド（スラッシュコマンド）が使用可能になります。
 
-> **注記**: 一部コマンドはプレフィックス形式（`?d`, `?p`, `?b` など）にも対応しており、従来の方式での使用も可能です。
 
 ### チャットチャンネル用コマンド
 
@@ -85,13 +82,11 @@ Discord Botを設定すると、以下のアプリケーションコマンド（
 
 #### `/p <gamertag>` - プレイヤー情報取得
 指定したプレイヤーの情報を取得します。
-- **対応プレフィックス**: `?p`, `?playerinfo`
-- **例**: `/p Player1` または `?p Player1`
+- **例**: `/p Player1`
 
 #### `/d <gamertag>` - 死亡ログ取得
 指定したプレイヤーの直近10件の死亡ログを取得します。
-- **対応プレフィックス**: `?d`, `?deathinfo`
-- **例**: `/d Player1` または `?d Player1`
+- **例**: `/d Player1`
 
 #### `/ban` - BAN管理
 プレイヤーのBAN操作を行います。
@@ -101,15 +96,12 @@ Discord Botを設定すると、以下のアプリケーションコマンド（
   - `gamertag`: 対象プレイヤーのゲーマータグ
   - `reason`: BAN理由
   - `expired` (オプション): BAN期間（時間）
-  - **対応プレフィックス**: `?b ban`, `?ban ban`
 
 - **isbanned `<gamertag>`** - プレイヤーがBANされているか確認
-  - **対応プレフィックス**: `?b isbanned`, `?ban isbanned`
 
 - **list** - BANリストを表示
 
 - **pardon `<gamertag>`** - プレイヤーのBANを解除
-  - **対応プレフィックス**: `?b pardon`, `?ban pardon`
 
 #### `/backup` - バックアップ操作
 サーバーのバックアップを管理します。
@@ -160,6 +152,6 @@ Discord Botを設定すると、以下のアプリケーションコマンド（
 
 ---
 
-> デフォルトのWebダッシュボードに複数のSIL Open Font License 1.1ライセンスフォントを使用しています。ライセンス詳細はフォント名.LICENSEファイルを確認してください
+> デフォルトのWebダッシュボード及びdocs内のWebページに複数のSIL Open Font License 1.1ライセンスフォントを使用しています。ライセンス詳細はフォント名.LICENSEファイルを確認してください
 
-> README.md、及びdocs/内のmdファイルには生成AIを使用しています
+> README.md、およびdocs 内のmdファイルには生成AIを使用しています

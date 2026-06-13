@@ -1,6 +1,6 @@
 # 設定ドキュメント
 
-BSW（Bedrock Server Wrapper）の設定について説明します。設定は `config.js` ファイルで行います。`config.sample.js` をコピーして `config.js` という名前に変更し、カスタマイズしてください。
+BSW（Bedrock Server Wrapper）の設定について説明します。設定は `config.js` ファイルで行います。`config.sample.js` をコピーして `config.js` に変更します
 
 ---
 
@@ -100,7 +100,7 @@ BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 
 ##### ban（BAN管理）
 
-管理者用チャンネルからプレイヤーのBAN情報を管理できます。
+管理者用チャンネルからプレイヤーのBAN操作ができます。
 
 | プロパティ    | 型    | 説明                                    |
 | -------- | ----- | ------------------------------------- |
@@ -214,5 +214,5 @@ Web管理画面にアクセスする際の設定です。`webUi` 内で `basicAu
 
 1. `config.sample.js` をコピーしてファイル名を `config.js` に変更します
 2. `config.js` をテキストエディタで開き、必要な設定を変更します
-3. 特にDiscordボットの場合は、`TOKEN` フィールドにあなたのBot Tokenを入力し、`guildId` を設定してください
+3. Discord Botを使用する場合は、`TOKEN` フィールドに DiscordのBotトークンを入力し、`guildId` に使うサーバーのIDを入力してください
 4. 設定が完了したら、BSWを起動すると新しい設定が適用されます

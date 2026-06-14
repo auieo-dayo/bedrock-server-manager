@@ -1185,7 +1185,8 @@ bds.on("leave",(json)=>{
 
 const LineSkipList = [
   /^\[.* INFO\] Saving\.\.\./,
-  /^\[.* INFO\] Changes to the world are resumed\./
+  /^\[.* INFO\] Changes to the world are resumed\./,
+  /^\[.* INFO\] Running AutoCompaction\.\.\./
 ]
 
 // BDS line

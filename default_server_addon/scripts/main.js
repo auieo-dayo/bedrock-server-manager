@@ -32,7 +32,30 @@ function btoa(str) {
     }
     return result;
 }
+function atob(str) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+    let output = '';
+    str = String(str).replace(/[=]+$/, '');
 
+    for (let i = 0; i < str.length; i += 4) {
+        let en1 = chars.indexOf(str[i]);
+        let en2 = chars.indexOf(str[i + 1]);
+        let en3 = chars.indexOf(str[i + 2]);
+        let en4 = chars.indexOf(str[i + 3]);
+
+        let chr1 = (en1 << 2) | (en2 >> 4);
+        let chr2 = ((en2 & 15) << 4) | (en3 >> 2);
+        let chr3 = ((en3 & 3) << 6) | en4;
+
+        output += String.fromCharCode(chr1);
+        if (en3 !== -1) output += String.fromCharCode(chr2);
+        if (en4 !== -1) output += String.fromCharCode(chr3);
+    }
+
+    return decodeURIComponent(Array.prototype.map.call(output, (c) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+}
 
 
 let BSW_SendPW = null

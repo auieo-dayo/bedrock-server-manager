@@ -51,7 +51,11 @@ class BDS {
 
 
         this.rl.on("line",(_line)=>{
-            const line = _line.replace(/^NO LOG FILE! \- /,"")
+            const line = _line
+                // なぜかたまについちゃうやつ
+                .replace(/^NO LOG FILE! \- /,"")
+                // なぜか入っちゃうnull文字
+                .replace(/\u0000/g,"");
             
             if (!line.trim()) return
 

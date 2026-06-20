@@ -87,7 +87,8 @@ const env_list = [
   "server-port",
   "server-portv6",
   "level-seed",
-  "level-name"
+  "level-name",
+  "allow-list"
 ]
 
 for (const item of env_list) {

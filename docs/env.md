@@ -66,6 +66,27 @@ difficulty=hard
 
 ---
 
+## allow-list設定
+
+### allow-list - `allow-list`
+
+サーバーへの接続を許可するプレイヤーの制限を有効化します。
+
+| プロパティ   | 型      | デフォルト | 説明                                   |
+| -------- | ------ | ------ | -------------------------------------- |
+| `allow-list` | boolean | false  | 接続を許可されたプレイヤーのみ接続を許可するか |
+
+**使用可能な値：**
+- `true` - 許可されたプレイヤーのみ接続できる
+- `false` - すべてのプレイヤーが接続可能（別途サーバー設定に依存）
+
+**例：**
+```
+allow-list=false
+```
+
+---
+
 ## チート設定
 
 ### チート許可 - `allow-cheats`
@@ -82,7 +103,7 @@ difficulty=hard
 
 **例：**
 ```
-allow-cheats=false
+allow-cheats=true
 ```
 
 ---
@@ -189,6 +210,7 @@ level-seed=MyCustomSeed
 server-name=MyMinecraftServer
 gamemode=survival
 difficulty=normal
+allow-list=false
 allow-cheats=true
 max-players=20
 

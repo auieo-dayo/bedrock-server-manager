@@ -1270,7 +1270,7 @@ let stop = false
 
 process.on('SIGINT', async() => {
   if (!bds.started) process.exit(0)
-  console.log(chalk.green("stoping BDS..."))
+  console.log(chalk.green("stopping BDS..."))
   if (backup && backup.isbackuping) {
     console.log(chalk.green("Wait for backup ended..."))
     await backup.waitForBackupEnd()
@@ -1281,7 +1281,7 @@ process.on('SIGINT', async() => {
 
 process.on('SIGTERM', async() => {
   if (!bds.started) process.exit(0)
-  console.log(chalk.green("stoping BDS..."))
+  console.log(chalk.green("stopping BDS..."))
   if (backup && backup.isbackuping) {
     console.log(chalk.green("Wait for backup ended..."))
     await backup.waitForBackupEnd()

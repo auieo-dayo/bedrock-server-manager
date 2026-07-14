@@ -233,7 +233,7 @@ setInterval(async()=>{
     li.textContent = p.name
     document.getElementById("players").appendChild(li)
   }
-},1000*10)
+},1000*5)
 document.getElementById("submit").addEventListener("click",()=>{
   const input = document.getElementById("inputcmd")
   if (!input.value) return

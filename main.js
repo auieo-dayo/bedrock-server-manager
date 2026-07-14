@@ -686,6 +686,10 @@ client.once(discord.Events.ClientReady, async () => {
 });
 
 
+
+const deprecatePrefix = async (message,slashcommand)=> {
+  await message.reply({content:`このプレフィックスコマンドは**非推奨になりました**\n\nスラッシュコマンド: ${slashcommand} をお使いください`,flags:MessageFlags.SuppressNotifications})
+}
 // Discordチャットイベント
 client.on(discord.Events.MessageCreate, message => {
   if (message.channelId == config.Discord.notifications.chat.channelId) {
@@ -713,7 +717,10 @@ client.on(discord.Events.MessageCreate, message => {
       return message.reply(`# Helps\n${md}`)
     }
     // PlayerListなら
-    if (message.content == "?playerlist" || message.content == "?pl") return discordCommands.chat.pl(onlinePlayer,message);
+    if (message.content == "?playerlist" || message.content == "?pl") {
+      discordCommands.chat.pl(onlinePlayer,message)
+      return deprecatePrefix(message,"/pl")
+    };
 
     // チャットを送信
     chatmng.sendtoMC(message.author.displayName,message.content)
@@ -762,6 +769,7 @@ client.on(discord.Events.MessageCreate, message => {
         if (prefix) {
           const content = message.content.slice(prefix.length+1)
           discordCommands.admin.p(bds,message,content)
+          deprecatePrefix(message,"/p")
         }
      } 
 
@@ -773,6 +781,7 @@ client.on(discord.Events.MessageCreate, message => {
         if (prefix){ 
           const content = message.content.slice(prefix.length+1)
           discordCommands.admin.d(content,message,channels.admin,logm)
+          deprecatePrefix(message,"/d")
         }
       }
 
@@ -787,11 +796,31 @@ client.on(discord.Events.MessageCreate, message => {
             return sendLongMessage(channels.admin,"# list,isbanned,ban,pardonを指定してください")
           }
           switch(content[0]) {
-            case "list": return discordCommands.admin.ban.list(bm,message)
-            case "isbanned": return discordCommands.admin.ban.isbanned(bm,content[1],message)
-            case "ban": return discordCommands.admin.ban.ban(content[1],content[2],bm,onlinePlayer,bds,message,{author:message.author,isdiscord:true})
-            case "pardon": return discordCommands.admin.ban.pardon(content[1],bm,message)
-            case "help": return message.reply({content:"# BanHelp\nlist\nisbanned `<playername>`\nban `<playername>` `<reason>`\npardon `<playername>`"})
+            case "list": {
+              discordCommands.admin.ban.list(bm,message)
+              deprecatePrefix(message,"/ban list")
+              break;
+            }
+            case "isbanned": {
+              discordCommands.admin.ban.isbanned(bm,content[1],message)
+              deprecatePrefix(message,"/ban isbanned")
+              break;
+            }
+            case "ban": {
+              discordCommands.admin.ban.ban(content[1],content[2],bm,onlinePlayer,bds,message,{author:message.author,isdiscord:true})
+              deprecatePrefix(message,"/ban ban")
+              break;
+            }
+            case "pardon": {
+              discordCommands.admin.ban.pardon(content[1],bm,message)
+              deprecatePrefix(message,"/ban pardon")
+              break;
+            }
+            case "help": {
+              message.reply({content:"# BanHelp\nlist\nisbanned `<playername>`\nban `<playername>` `<reason>`\npardon `<playername>`"})
+              deprecatePrefix(message,"/ban")
+              break
+            }
           }
         }
       }
@@ -821,7 +850,7 @@ async function getBackupCache() {
 const Blocks = {list:new Set(),last:0}
 function getBlocks() {
   const diff =  Date.now() - Blocks.last
-  if (1000*60*10 <= diff) {
+  if (1000*60*60*24 <= diff) {
     const res = logm.db.prepare(`SELECT DISTINCT typeid FROM blockevents`).all()
     Blocks.list = new Set(res.map(v=>v.typeid))
     Blocks.last = Date.now()
@@ -1274,13 +1303,13 @@ function OnError(err) {
   logm.Server(`ERROR - ${err.name} | ${err.message}`);
   (async()=>{
     try {
-      if (config.Discord.enabled && channels.serverStatus &&config.Discord.notifications.serverStatus.enabled&&client.isReady()) {
+      if (config.Discord.enabled && channels.admin &&config.Discord.notifications.serverStatus.enabled&&client.isReady()) {
         const serverErrEmbed = new discord.EmbedBuilder()
         .setTitle(`サーバーで例外エラーが発生しました${err.name}(${err.message})`)
         .setDescription(`[${servername}]${worldname}`)
         .setColor(0xf54242)
         .setTimestamp(new Date())
-        await channels.serverStatus.send({embeds:[serverErrEmbed]})
+        await channels.admin.send({embeds:[serverErrEmbed]})
       }
     }catch(e) {
         console.error(chalk.red("例外通知失敗:", e.message));

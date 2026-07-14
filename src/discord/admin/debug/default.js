@@ -4,6 +4,8 @@ const { getCpuUsage } = require("../../../cpuusage");
 
 
 async function d(message,logm) {
+    await message.deferReply({content:"取得中です..."})
+
     const cpu = (await getCpuUsage(100)).toFixed(0)
     const memFree = os.freemem()/1073741824
     const memTotal = os.totalmem()/1073741824
@@ -26,7 +28,7 @@ async function d(message,logm) {
         {name:"DB-blockEvents",value:`${blockEvents_count?.count || 0}件`}
     )
     embed.setTimestamp(new Date())
-    await message.reply({embeds:[embed]})
+    await message.editReply({embeds:[embed]})
 }
 
 module.exports = d

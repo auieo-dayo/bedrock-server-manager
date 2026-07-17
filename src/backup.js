@@ -3,6 +3,11 @@ const crypto = require("crypto")
 const path = require("path")
 const chalk = require("chalk");
 const config = require('../config/config');
+const {ZipArchive} = require("archiver");
+
+
+
+const jobManager = require('./jobManagaer');
 
 
 const pad = n => String(n).padStart(2, "0");
@@ -80,11 +85,15 @@ async function walkDir(dir, relativePath = "") {
 
 
 class Backup {
-    constructor(root,BDS_path,backup_path,worldname) {
+    constructor(root,BDS_path,backup_path,worldname,JobManager) {
         this.root = root
         this.bpath = backup_path
         this.BDS = BDS_path
         this.worldname = worldname
+        /**
+         * @type {jobManager}
+         */
+        this.JobManager = JobManager
 
         this._events = {
             start: [],
@@ -188,9 +197,6 @@ class Backup {
             pad(date.getDate()),
             `${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}${isfull ? `_FULL` : ""}`
         )
-
-
-       
 
         
         const snapshotFile = path.join(this.bpath, "snapshot.json");
@@ -330,47 +336,126 @@ class Backup {
         };
     }
 
+
+    async getRestoreApplyList(target) {
+        const backups = (await this.getlist("",true)).data
+
+        const date = new Date(target)
+
+        const datetext = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} - ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+
+        // Fullからtargetまでのバックアップを取る
+        const list = backups.fullbackuplist
+        .filter(b => {
+            const d = new Date(
+            b.date.yyyy, b.date.MM - 1, b.date.dd,
+            b.date.hh, b.date.mm, b.date.ss
+            );
+            return d <= date;
+        })
+        .sort((a, b) => {
+            const da = new Date(a.date.yyyy, a.date.MM - 1, a.date.dd, a.date.hh, a.date.mm, a.date.ss);
+            const db = new Date(b.date.yyyy, b.date.MM - 1, b.date.dd, b.date.hh, b.date.mm, b.date.ss);
+            return da - db;
+        });
+
+
+        // 一番近いFULL
+        const startIndex = list.map(v => v.full).lastIndexOf(true);
+
+
+        if (startIndex === -1) {
+            throw new Error("FULL backup not found");
+        }
+
+        const applyList = list.slice(startIndex);
+        return {applyList,target:datetext}
+    }
+    exportBackup(target) {
+        const date = new Date(target)
+        if (typeof date?.getTime() === "undefined" || Number.isNaN(date?.getTime())) {
+            throw new Error("Not valid target(exportBackup)")
+        }
+
+        const jobid = this.JobManager.addJob("BackupExport")
+        this.__exportBackup(jobid,date)
+        return jobid
+    }
+
+    async __exportBackup(jobid,date) {
+        try {
+            const fileList = await this.getRestoreApplyList(date)
+            
+            const exportName = `${Date.now()}-${String(date.getFullYear()).padStart(3,"0")}-${pad(date.getMonth()+1)}-${pad(date.getDate())}-${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`
+            
+            const destFolder = path.join(this.root,"temp","BackupExport")
+            const tempFolderExport = path.join(destFolder,`${exportName}`)
+            
+            await fs.ensureDir(tempFolderExport)
+            for (const file of fileList.applyList) {
+                const dir = path.join(this.bpath,file.fullpath)
+                const files = await getAllFiles(dir);
+                
+                for (const file of files) {
+                    const src = path.join(dir, file);
+                    const dest = path.join(tempFolderExport, file);
+
+                    await fs.ensureDir(path.dirname(dest));
+                    await fs.copy(src, dest);
+                }
+            }
+
+            const ExportDest = path.join(destFolder,`${exportName}.zip`)
+            const output = fs.createWriteStream(ExportDest);
+
+            const archive = new ZipArchive({
+                zlib: { level: 6 }
+            });
+
+            await new Promise((resolve, reject) => {
+                output.on("close", ()=>{
+                    console.log(`バックアップ圧縮完了: ${archive.pointer()} bytes`);
+                    resolve()
+                });
+                archive.on("error", reject);
+                output.on("error", reject);
+
+                archive.pipe(output);
+                archive.directory(tempFolderExport, false);
+                archive.finalize();
+            });
+            
+            await fs.remove(tempFolderExport)
+            setTimeout(async ()=>{
+                await fs.remove(ExportDest)
+            },1000*60*15)
+            this.JobManager.endJob(jobid,false,{path:`/temp/ExportBackup/${exportName}.zip`,expire:Date.now()+1000*60*15})
+
+        }catch(e){
+            this.JobManager.endJob(jobid,true,{path:``})
+            setTimeout(()=>{
+                this.JobManager.deleteJob(jobid)
+            },1000*60*15)
+            throw e
+        }
+    }
+
     async restore(target) {
         try {
             await this.waitForBackupEnd()
             if (this.isrestoring) return
-            const backups = (await this.getlist("",true)).data
 
             const date = new Date(target)
 
+            const applyListRes = await this.getRestoreApplyList(date)
+            const applyList = applyListRes.applyList
+
             console.log(chalk.bgGreen("StartRestore from Backups..."))
-            const datetext = `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} - ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-            console.log(chalk.bgGreen(`Target:${datetext}`))
-            this.emit("restoreStart",date)
+            console.log(chalk.bgGreen(`Target:${applyListRes.target}`))
             this.isrestoring = true
+            this.emit("restoreStart",date)
 
-            // Fullからtargetまでのバックアップを取る
-            const list = backups.fullbackuplist
-            .filter(b => {
-                const d = new Date(
-                b.date.yyyy, b.date.MM - 1, b.date.dd,
-                b.date.hh, b.date.mm, b.date.ss
-                );
-                return d <= date;
-            })
-            .sort((a, b) => {
-                const da = new Date(a.date.yyyy, a.date.MM - 1, a.date.dd, a.date.hh, a.date.mm, a.date.ss);
-                const db = new Date(b.date.yyyy, b.date.MM - 1, b.date.dd, b.date.hh, b.date.mm, b.date.ss);
-                return da - db;
-            });
-
-
-            // 一番近いFULL
-            const startIndex = list.map(v => v.full).lastIndexOf(true);
-
-
-            if (startIndex === -1) {
-                throw new Error("FULL backup not found");
-            }
-
-            const applyList = list.slice(startIndex);
-
-            console.log(chalk.bgGreen(`Start:${applyList[0].fullpath} to End:${applyList[applyList.length-1].fullpathja}`))
+            console.log(chalk.bgGreen(`Start:${applyList[0].fullpath} to End:${applyList[applyList.length-1].fullpath}`))
             const worldspath = path.join(this.BDS, "worlds");
             const restorePath = path.join(worldspath,`${this.worldname}_tmp`);
             try {

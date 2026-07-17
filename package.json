@@ -1,6 +1,6 @@
 {
   "name": "bedrock-server-wrapper",
-  "version": "7.2.0",
+  "version": "7.2.7",
   "main": "main.js",
   "scripts": {
     "start": "node main.js"
@@ -10,6 +10,7 @@
   "license": "MIT",
   "description": "",
   "dependencies": {
+    "archiver": "^8.0.0",
     "better-sqlite3": "^12.9.0",
     "chalk": "^4.1.2",
     "discord.js": "^14.25.1",

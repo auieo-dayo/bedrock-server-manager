@@ -23,7 +23,7 @@ const BDS = require("./src/BDS")
 const Backup = require("./src/backup")
 const Logger = require("./src/logger")
 const betaApi = require("./src/enableBetaApi")
-
+const jobmanager = require("./src/jobManagaer")
 
 // project-root
 
@@ -33,6 +33,8 @@ const root = __dirname
 
 const BackupInterval = config.backup.interval
 
+// JobManager
+const JobManager = new jobmanager()
 
 // BDS Online Players
 
@@ -430,6 +432,34 @@ app.get('/api/backuplist', async(req, res, next) => {
   }
 });
 
+app.get("/temp/ExportBackup/:file",async(req,res,next)=>{
+  try {
+    if (!req.params.file) return res.sendStatus(400);
+    const jobs = [...JobManager.jobs.values()]
+    const job = jobs.find((v)=>(v.jobType==="BackupExport"&&v.result.path === `/temp/ExportBackup/${req.params.file}`))
+    if (!job) return res.sendStatus(400);
+    const p = path.join(root,"temp","BackupExport",req.params.file)
+    if (!await fs.exists(p)) return res.sendStatus(400);
+
+    res.sendFile(p)
+
+  }catch(e){next(e)}
+})
+app.get("/api/jobs/:jobid",(req,res,next)=>{
+  try {
+    const jobid = req.params.jobid
+    const job = JobManager.getJob(jobid)
+    return res.send(job)
+  }catch(e){next(e)}
+})
+app.post("/api/backup/export",async(req,res,next)=>{
+  try {
+    const body = req.body
+    if (!body.target) return res.sendStatus(400);
+    const jobid = await backup.exportBackup(body.target)
+    return res.send({jobid})
+  }catch(e){next(e)}
+})
 
 app.use(express.static(path.join(root,"www")))
 
@@ -516,6 +546,12 @@ function WSbroadcast(json) {
     }
   });
 }
+
+// JobBroadCast
+
+JobManager.on("endJob",(jobid,isfailed)=>{
+  WSbroadcast({type:"endJob",jobid,isfailed})
+})
 
 // Discord
 
@@ -1003,7 +1039,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
 const backup_path = path.join(root,"backup",servername,worldname)
 
 
-const backup = new Backup(root,BDS_path,backup_path,worldname)
+const backup = new Backup(root,BDS_path,backup_path,worldname,JobManager)
 
 const latestbackup = {isfull:false,time:0}
 backup.on("start",(isfull)=>{

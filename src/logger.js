@@ -1,4 +1,5 @@
 const Database = require("better-sqlite3")
+const config = require("../config/config")
 
 const Types = {
     events: {
@@ -153,6 +154,7 @@ class Logger {
      * @param {{x:number,y:number,z:number}} location 
      */
     PlaceBlock(player,typeid,dimension,location) {
+        if (!config.blockLog.enabled) return;
         for (const v of Object.entries(location)) {if (typeof v[1] !== "number") throw new Error(`${v[1]} is not number(location:${v[0]})`)}
         if (typeof typeid !== "string") throw new Error(`${typeid} is not string(typeid)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
@@ -167,6 +169,7 @@ class Logger {
      * @param {{x:number,y:number,z:number}} location 
      */
     BreakBlock(player,typeid,dimension,location) {
+        if (!config.blockLog.enabled) return;
         for (const v of Object.entries(location)) {if (typeof v[1] !== "number") throw new Error(`${v[1]} is not number(location:${v[0]})`)}
         if (typeof typeid !== "string") throw new Error(`${typeid} is not string(typeid)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
@@ -181,6 +184,7 @@ class Logger {
      * @param {{typeid:string,location:{x:number,y:number,z:number}}[]} blocks 
      */
     ExplodeBlock(source,dimension,location,blocks) {
+        if (!config.blockLog.enabled) return;
         if (!Array.isArray(blocks)) throw new Error(`${blocks} is not array(Blocks)`)
         // if (typeof typeid !== "string") throw new Error(`${typeid} is not string(player)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
@@ -199,6 +203,14 @@ class Logger {
             }
         })
         insert(blocks)
+    }
+
+    BlockLogRemoveOld() {
+        if (config.blockLog.autoDeleteAfterDays <= 0) return { changes: 0 };
+        const deleteBefore = new Date(Date.now() - (1000*60*60*24*config.blockLog.autoDeleteAfterDays))
+        const res = this.db.prepare(`DELETE FROM blockevents WHERE time <= ?`).run(deleteBefore.getTime())
+        if (res.changes >= 0) console.log(`${config.blockLog.autoDeleteAfterDays}日以上前のブロックログを${res.changes}件消去しました。`)
+        return res
     }
 }
 

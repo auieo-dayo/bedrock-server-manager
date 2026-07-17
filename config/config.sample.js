@@ -78,6 +78,12 @@ const config = {
         // バックアップを自動で削除する日数(0の場合削除しない)
         "autoDeleteAfterDays": 7
     },
+    "blockLog": {
+        // ブロックの 設置/破壊/爆発 ログを収集するかどうか
+        "enabled":true,
+        // ログの最大保持期間(0の場合削除しない)
+        "autoDeleteAfterDays": 14
+    },
     "webUi": {
         // ダッシュボードを公開するポート
         "port": 3000,

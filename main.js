@@ -869,6 +869,9 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     const commandName = interaction.commandName
     // BlockEventsのAutoComplete
     if (focused.name == "block" && commandName == "block") {
+      if (!config.blockLog.enabled) {
+        return await interaction.respond([])
+      }
       const q = focused.value.toLowerCase()
       /**
        * @type {string[]}
@@ -968,6 +971,11 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
   }
   // Block系
   if (commandName === "block") {
+
+    if (!config.blockLog.enabled) {
+      return await interaction.reply({content:"ブロックログの収集が有効になっていません"})
+    }
+
     const type = interaction.options.getString("type")
     const player = interaction.options.getString("player")
     const minutes = interaction.options.getInteger("minutes")
@@ -1037,7 +1045,10 @@ function scheduleNextMidnightFullBackup() {
       if (config.console.backupLogToConsole) console.log(chalk.bgMagenta("Starting daily FULL backup..."));
       const list = await backup.waitForPreparationsComplete(bds)
       await backup.backup(list,true, true,onlinePlayer,bds); // notskip=true, full=true
+      // backupの消去
       await backup.removeOld()
+      // ブロックログの消去もついでにやっちゃう
+      logm.BlockLogRemoveOld()
     } catch(e){
       console.error(chalk.red(`[DAYLY-FULL-BACKUP-ERROR]${e}`))
     } finally {

@@ -688,7 +688,7 @@ client.once(discord.Events.ClientReady, async () => {
 
 
 const deprecatePrefix = async (message,slashcommand)=> {
-  await message.reply({content:`このプレフィックスコマンドは**非推奨になりました**\n\nスラッシュコマンド: ${slashcommand} をお使いください`,flags:MessageFlags.SuppressNotifications})
+  await message.reply({content:`このプレフィックスコマンドは**非推奨になりました**\n\nスラッシュコマンド: ${slashcommand} をお使いください`,flags:discord.MessageFlags.SuppressNotifications})
 }
 // Discordチャットイベント
 client.on(discord.Events.MessageCreate, message => {

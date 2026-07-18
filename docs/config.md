@@ -210,6 +210,28 @@ Web管理画面にアクセスする際の設定です。`webUi` 内で `basicAu
 
 ---
 
+## 5. blockLog（ブロックログ設定）
+
+ブロックの設置・破壊・爆発ログを記録する設定です。
+
+### プロパティ
+
+| プロパティ | 型 | 説明 |
+| --- | --- | --- |
+| `enabled` | boolean | ブロックログを有効化するか |
+| `autoDeleteAfterDays` | number | ログの最大保持期間。`0` の場合は削除しません |
+
+### 設定例
+
+```javascript
+"blockLog": {
+    "enabled": true,
+    "autoDeleteAfterDays": 14
+}
+```
+
+---
+
 ## セットアップ手順
 
 1. `config.sample.js` をコピーしてファイル名を `config.js` に変更します

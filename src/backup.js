@@ -7,9 +7,6 @@ const {ZipArchive} = require("archiver");
 
 
 
-const jobManager = require('./jobManagaer');
-
-
 const pad = n => String(n).padStart(2, "0");
 
 function hashFile(filePath) {
@@ -90,9 +87,6 @@ class Backup {
         this.bpath = backup_path
         this.BDS = BDS_path
         this.worldname = worldname
-        /**
-         * @type {jobManager}
-         */
         this.JobManager = JobManager
 
         this._events = {
@@ -433,10 +427,11 @@ class Backup {
 
         }catch(e){
             this.JobManager.endJob(jobid,true,{path:``})
+            throw e
+        } finally {
             setTimeout(()=>{
                 this.JobManager.deleteJob(jobid)
             },1000*60*15)
-            throw e
         }
     }
 

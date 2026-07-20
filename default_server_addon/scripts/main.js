@@ -273,7 +273,12 @@ system.beforeEvents.startup.subscribe((ev)=>{
     },(origin, arg) => {
         system.runTimeout(() => {
             const json = JSON.parse(arg.replace(/'/g, '"'))
-            if (json.type == "backuplist") {
+            if (json.type === "chat") {
+                if (!json.data) return;
+                const text = atob(json.data);
+                const rawtext = {rawtext:[{text}]}
+                world.sendMessage(rawtext)
+            } else if (json.type == "backuplist") {
                 const {source,data} = json
                 let text = "§aバックアップリスト(本日分)"
                 const today = []

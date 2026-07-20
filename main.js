@@ -670,9 +670,8 @@ const chatmng = {
     const returnText = `§3[D]${name}§r:${message}`
     logm.Chat(name,true,message)
     WSbroadcast({ type: "chat", data: `[D]${name}:${message}`})
-    const rawtext = {"rawtext":[{"text":`${returnText.replace(/\n/g,"\\n")}`}]}
-    if (onlinePlayer.getAll().length != 0) bds.sendCommand(`tellraw @a ${JSON.stringify(rawtext)}`,true)
-
+    const base64 = Buffer.from(returnText.replace(/\n/g,"\\n")).toString('base64');
+    if (onlinePlayer.getAll().length != 0) bds.sendCommand(`send "${JSON.stringify({type:"chat","data":base64}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
   },
   "sendtoDis": async(name,message) => {
     if (config.console.chatLogToConsole) console.log(chalk.yellow(`${name}:${message}`))
@@ -1138,8 +1137,7 @@ try {
 }
 };
 
-// Addon Sync
-addon_copy()
+
 
 const bm = new BanManager(root);
 
@@ -1190,6 +1188,8 @@ let bds = new BDS(BDS_path,BDS_file,logm,wss,false);
 // スタート
 (async()=>{
   await BetaApiEnable.run()
+  // Addon Sync
+  addon_copy()
   bds.restart()
   // 初回Backup
   let startedBackup = false;

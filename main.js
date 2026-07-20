@@ -1189,7 +1189,7 @@ let bds = new BDS(BDS_path,BDS_file,logm,wss,false);
 (async()=>{
   await BetaApiEnable.run()
   // Addon Sync
-  addon_copy()
+  await addon_copy()
   bds.restart()
   // 初回Backup
   let startedBackup = false;

@@ -31,10 +31,6 @@ import fetchbds from "./src/fetchBDS.js";
 
 const root = import.meta.dirname
 
-// Backup Setting
-
-const BackupInterval = config.backup.interval
-
 // JobManager
 const JobManager = new jobmanager()
 
@@ -87,7 +83,7 @@ if (!await fs.pathExists(BDS_file)) {
 // BDS properties Path
 
 const properties_path = path.join(BDS_path,"server.properties")
-const properties = PropertiesReader(properties_path);
+const properties = PropertiesReader({sourceFile:properties_path});
 
 // BDS properties edit
 
@@ -109,7 +105,7 @@ if (typeof process.env[item] == "undefined") continue;
 properties.set(item,process.env[item])
 }
 properties.set("content-log-console-output-enabled","true")
-properties.save(properties_path);
+await properties.save(properties_path);
 
 
 // default_server_addon module config
@@ -761,10 +757,7 @@ client.on(discord.Events.MessageCreate, message => {
       return message.reply(`# Helps\n${md}`)
     }
     // PlayerListなら
-    if (message.content == "?playerlist" || message.content == "?pl") {
-      discordCommands.chat.pl(onlinePlayer,message)
-      return deprecatePrefix(message,"/pl")
-    };
+    if (message.content == "?playerlist" || message.content == "?pl") return discordCommands.chat.pl(onlinePlayer,message);
 
     // チャットを送信
     chatmng.sendtoMC(message.author.displayName,message.content)
@@ -1195,26 +1188,24 @@ let bds = new BDS(BDS_path,BDS_file,logm,wss,false);
 
 
 // スタート
-(async()=>{
-  await BetaApiEnable.run()
-  // Addon Sync
-  await addon_copy()
-  bds.restart()
-  // 初回Backup
-  let startedBackup = false;
 
-  const waitBackup = setInterval(() => {
-    if (bds.server_started && !startedBackup) {
-      startedBackup = true;
-      clearInterval(waitBackup);
-      // 定期バックアップ
-      setInterval(async() => {
-        const list = await backup.waitForPreparationsComplete(bds)
-        await backup.backup(list,false,false,onlinePlayer,bds);
-      }, 1000 * 60 * BackupInterval);
-    }
-  }, 500); // 0.5秒ごとにチェック
-})();
+await BetaApiEnable.run()
+// Addon Sync
+await addon_copy()
+bds.restart()
+
+// Backup
+const startIntervalBackup = ()=>{
+  if (config.backup.enabled) {
+    setInterval(async() => {
+      const list = await backup.waitForPreparationsComplete(bds)
+      await backup.backup(list,false,false,onlinePlayer,bds);
+    }, 1000 * 60 * BackupInterval);
+  }
+  bds.off("started",startIntervalBackup)
+}
+bds.on("started",startIntervalBackup)
+
 
 
 
@@ -1230,7 +1221,7 @@ bds.on("started",()=>{
   if (discordstarted) sendStartEmbed()
   if (config.Discord.enabled) client.login(config.Discord.TOKEN);
   bds.sendCommand(`send "${JSON.stringify({type:"syncConf","data":{pass:BDSsendPass,port:config.webUi.port}}).replaceAll("\"","'").replaceAll("\\","\\\\'")}"`,true)
-  // Backup
+  // 初回バックアップ
   backup.waitForPreparationsComplete(bds).then((list)=>{
     backup.backup(list,false,true,onlinePlayer,bds)
   })

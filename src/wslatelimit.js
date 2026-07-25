@@ -27,4 +27,4 @@ class limit {
     }
 }
 
-module.exports = limit
+export default limit

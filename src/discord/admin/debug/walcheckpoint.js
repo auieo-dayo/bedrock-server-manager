@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+import { EmbedBuilder } from "discord.js"
 async function walcheckpoint(logm,message) {
     const embed = new EmbedBuilder()
     embed.setTimestamp(new Date())
@@ -10,4 +10,4 @@ async function walcheckpoint(logm,message) {
     await message.reply({embeds:[embed]})
 }
 
-module.exports = walcheckpoint
+export default walcheckpoint

@@ -1,5 +1,5 @@
-const backup = require("./backup/backup")
-const restore = require("./backup/restore")
-const list = require("./backup/list")
+import backup from "./backup/backup.js"
+import restore from "./backup/restore.js"
+import list from "./backup/list.js"
 
-module.exports = {backup,restore,list}
+export default {backup,restore,list}

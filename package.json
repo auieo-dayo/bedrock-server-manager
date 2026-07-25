@@ -5,9 +5,15 @@
   "scripts": {
     "start": "node main.js"
   },
-  "keywords": ["minecraft","minecraftserver","bedrock","minecraftbedrock"],
+  "keywords": [
+    "minecraft",
+    "minecraftserver",
+    "bedrock",
+    "minecraftbedrock"
+  ],
   "homepage": "bsm.auieo.f5.si",
   "author": "auieo-dayo",
+  "type": "module",
   "license": "MIT",
   "description": "Minecraft Bedrock Server Manager",
   "dependencies": {
@@ -22,6 +28,7 @@
     "fs-extra": "^11.3.0",
     "prismarine-nbt": "^2.8.0",
     "properties-reader": "^2.3.0",
+    "unzipper": "^0.12.5",
     "uuid": "^11.1.0",
     "ws": "^8.18.3"
   },

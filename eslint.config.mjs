@@ -9,7 +9,7 @@ export default defineConfig([
     ignores: ["www/**"],
     ...js.configs.recommended,
     languageOptions: {
-      sourceType: "commonjs",
+      sourceType: "module",
       globals: globals.node,
     },
     rules: {

@@ -6,4 +6,4 @@ function b(isfull,backup,message,bds,playerstore) {
     })
 }
 
-module.exports = b
+export default b

@@ -1,5 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
-
+import { v4 } from "uuid"
 
 class jobManager {
     constructor() {
@@ -13,7 +12,7 @@ class jobManager {
      * @param {"ExportBackup"} jobType 
      */
     addJob(jobType) {
-        const jobid = uuidv4()
+        const jobid = v4()
         let result = {}
         switch(jobType) {
             case "ExportBackup": {
@@ -94,4 +93,4 @@ class jobManager {
     }
 }
 
-module.exports = jobManager
+export default jobManager

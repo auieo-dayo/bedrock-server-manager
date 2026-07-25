@@ -1,5 +1,5 @@
-const { EmbedBuilder } = require("discord.js");
-const { formatDate } = require("../../../formatDate");
+import { EmbedBuilder } from "discord.js";
+import { formatDate } from "../../../formatDate.js"
 
 // content[1]
 async function isbanned(bm,playername,message) {
@@ -23,5 +23,5 @@ async function isbanned(bm,playername,message) {
     if (!info) embed.setDescription("BANされていません");else embed.setDescription(`BANされています。\n理由:${info.reason}\n解除まで:${expiredtimetext}\n-# BANした人:${info.author.author}(${info.author.isdiscord ? "Discord" : "Minecraft"})\n-# BAN時刻:${formatDate(new Date(info.time))}`)
     await message.reply({embeds:[embed]})
 }
-module.exports = isbanned
+export default isbanned
 

@@ -1,33 +1,35 @@
 // Bedrock Server Manager
-const path = require("path")
-const WebSocket = require('ws');
-const dotenv = require("dotenv");
+import path from "path"
+import WebSocket , {WebSocketServer} from "ws"
+import dotenv from "dotenv"
 dotenv.config();
-const PropertiesReader = require('properties-reader');
-const fs = require("fs-extra")
-const chalk = require('chalk');
-const discord = require("discord.js")
-const { v4: uuidv4 } = require('uuid');
+import PropertiesReader from "properties-reader";
+import fs from "fs-extra"
+import chalk from "chalk"
+import * as discord from "discord.js"
+import {v4} from "uuid"
+import os from "os"
 
 
-const wslimit = require('./src/wslatelimit');
-const wstoken = require('./src/wstoken');
+import wslimit from "./src/wslatelimit.js"
+import wstoken from "./src/wstoken.js";
 const wst = new wstoken(60000)
-const config = require('./config/config');
-const playerstore = require("./src/playerList")
-const BanManager = require("./src/ban")
-const discordCommands = require('./src/discord/commands');
-const { setCommands } = require("./src/discord/setGuildCommands")
-const {formatDate,msToYMDHMS} = require("./src/formatDate")
-const BDS = require("./src/BDS")
-const Backup = require("./src/backup")
-const Logger = require("./src/logger")
-const betaApi = require("./src/enableBetaApi")
-const jobmanager = require("./src/jobManagaer")
+import config from "./config/config.js";
+import playerstore from "./src/playerList.js"
+import BanManager from "./src/ban.js"
+import discordCommands from "./src/discord/commands.js"
+import { setCommands } from "./src/discord/setGuildCommands.js"
+import {formatDate,msToYMDHMS} from "./src/formatDate.js"
+import BDS from "./src/BDS.js"
+import Backup from "./src/backup.js"
+import * as Logger from "./src/logger.js"
+import betaApi from "./src/enableBetaApi.js"
+import jobmanager from "./src/jobManagaer.js";
+import fetchbds from "./src/fetchBDS.js";
 
 // project-root
 
-const root = __dirname
+const root = import.meta.dirname
 
 // Backup Setting
 
@@ -55,19 +57,28 @@ let servername = process.env["server-name"]
 
 // time
 
-const dbpath = path.join(__dirname,"datas","app.db")
-fs.ensureDirSync(path.dirname(dbpath))
+const dbpath = path.join(root,"datas","app.db")
+await fs.ensureDir(path.dirname(dbpath))
 const logm = new Logger.Logger(dbpath)
 
-const BSMVer = require("./package.json").version
+const BSMVer = await fs.readJSON("package.json").version
 // StartupText
 console.log(chalk.bgBlue(`BSM By auieo-dayo\nVersion:${BSMVer}`))
 logm.Server(`BSM by auieo-dayo | Ver:${BSMVer}`,true)
 
-// BDS Check
-if (!fs.pathExistsSync(BDS_file)) {
-  console.error(chalk.bgRed("BDSの存在を確認できませんでした。"))
+// OSチェック
+const runningOS = os.platform()
+if (!["win32","linux"].includes(runningOS)) {
+  console.error(chalk.bgRed("動作対象外のOSです"))
   process.exit(1)
+}
+
+const fetchBDS = new fetchbds(root,BDS_path)
+
+// BDS Check
+if (!await fs.pathExists(BDS_file)) {
+  console.log(chalk.green("BDSの存在を確認できませんでした。DLします。"))
+  await fetchBDS.fetchBDS(config.autoUpdate.Minecraft.isPreview,{win32:"Windows",linux:"Linux"}[runningOS])
 }
 
 
@@ -110,30 +121,28 @@ const DSD_modules = [
     "@minecraft/server-net"
 ]
 const DSD_modules_path = path.join(BDS_path,"config","default","permissions.json")
-const nowDSD_modules = fs.readJSONSync(DSD_modules_path)
+const nowDSD_modules = await fs.readJSON(DSD_modules_path)
 DSD_modules.map((item)=>{
   if (!nowDSD_modules.allowed_modules.includes(item)) {
     nowDSD_modules.allowed_modules.push(item)
   }
 })
-fs.writeJSONSync(DSD_modules_path,nowDSD_modules)
+await fs.writeJSON(DSD_modules_path,nowDSD_modules)
 
 
 
 // WebServer
-const express = require('express');
+import express from "express";
 const app = express();
-const http = require("http");
+import http from "http"
 const server = http.createServer(app);
 
-const basicAuth = require('express-basic-auth');
+import basicAuth from "express-basic-auth"
 
 const PORT = config.webUi.port;
 
-const os = require('os');
-const { getCpuUsage } = require("./src/cpuusage");
-const { default: rateLimit } = require('express-rate-limit');
-
+import { getCpuUsage } from "./src/cpuusage.js"
+import rateLimit from "express-rate-limit";
 
 app.set('trust proxy', config.webUi.trustProxy);
 
@@ -158,7 +167,7 @@ app.use(express.json());
 // BDS Send Basic
 
 // Passwordの生成
-const BDSsendPass = uuidv4();
+const BDSsendPass = v4();
 
 
 app.use('/api/bds/',(req,res,next)=>{
@@ -475,7 +484,7 @@ app.use((err, req, res,next) => {
 
 // Websocket Server
 
-const wss = new WebSocket.Server({ noServer: true, path: "/ws" });
+const wss = new WebSocketServer({ noServer: true, path: "/ws" });
 
 if (config.console.bsmSystemLogToConsole) console.log(chalk.bgBlue(`WebSocket Ready`))
 
@@ -1378,10 +1387,10 @@ process.on('uncaughtException',err => {
 
 // BDS Close
 
-bds.on('close', async(code) => {
+bds.on('close', async(code,iserr) => {
   console.log(chalk.green(`BDS終了(${code})`));
 
-  if (!stop && !BetaApiEnable.enabled && BetaApiEnable.restart) {
+  if (!stop && !BetaApiEnable.enabled && BetaApiEnable.restart && !iserr) {
     BetaApiEnable.run().then(()=>bds.restart())
   }
 

@@ -1,4 +1,4 @@
-const { msToYMDHMS, formatDate } = require("../../../formatDate");
+import { msToYMDHMS, formatDate } from "../../../formatDate.js"
 
 // content[1],content[2]
 
@@ -19,4 +19,4 @@ async function ban(playername,reason,bm,onlinePlayer,bds,message,author,expiredt
     };
     await message.reply({content:`${playername}を${reason}でBANしました`})
 }
-module.exports = ban
+export default ban

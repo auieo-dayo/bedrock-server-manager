@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+import { EmbedBuilder } from "discord.js"; 
 
 async function list(bm,message) {
     let md = ""
@@ -17,4 +17,4 @@ async function list(bm,message) {
         .setTimestamp(new Date())
     await message.reply({embeds:[embed]})
 }
-module.exports = list
+export default list

@@ -1,10 +1,8 @@
-const chalk = require("chalk")
-const { spawn } = require("child_process");
-const readline = require("readline");
-const config = require("../config/config");
-const WebSocket = require("ws");
-
-
+import chalk from "chalk";
+import { spawn } from "child_process";
+import readline from "readline";
+import config from "../config/config.js";
+import WebSocket from "ws";
 class BDS {
     /**
      * 
@@ -47,6 +45,11 @@ class BDS {
         this.bds.on("close",(code)=>{
             this.emit("close",code)
             this.started = false
+        })
+        this.bds.on("error",(err)=>{
+            this.emit("close","?",true)
+            this.started = false
+            throw err
         })
 
 
@@ -167,4 +170,4 @@ class BDS {
     }
 }
 
-module.exports = BDS
+export default BDS

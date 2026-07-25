@@ -1,19 +1,20 @@
-const pl = require("./chat/pl");
+import pl from "./chat/pl.js";
 
 
 
-const d = require("./admin/d");
-const p = require("./admin/p");
+import d from "./admin/d.js";
+import p from "./admin/p.js";
 
-const ban = require("./admin/ban")
 
-const backup = require("./admin/backup")
+import ban from "./admin/ban.js";
 
-const block = require("./admin/block")
+import backup from "./admin/backup.js";
 
-const debug = require("./admin/debug")
+import block from "./admin/block.js";
 
-module.exports = {
+import debug from "./admin/debug.js";
+
+export default {
     chat: { pl },
     admin: { p, d, ban, backup, block, debug }
 }

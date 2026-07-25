@@ -26,8 +26,8 @@ BSM は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールで�
 - WebSocket: [docs/Websocket.md](docs/Websocket.md)
 
 ## 必要条件
+- Linux か Windowsの実行環境
 - Node.js 22 以上
-- BDS（Bedrock Dedicated Server）をbds/に配置しておくこと
 
 ## セットアップ
 1. 依存パッケージをインストール
@@ -35,8 +35,6 @@ BSM は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールで�
 ```bash
 npm install
 ```
-
-2. BDS をダウンロードし、リポジトリルートに `bds` フォルダを置く
 
 ## BetaAPI について
 

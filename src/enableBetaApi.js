@@ -1,5 +1,4 @@
-const nbt = require('prismarine-nbt')
-
+import nbt from "prismarine-nbt"
 
 /**
  * 
@@ -40,4 +39,4 @@ async function checkBetaApi(rawNbt) {
     } else return {isBetaApiEnabled:false}
 }
 
-module.exports = {enableBetaApi,checkBetaApi}
+export default {enableBetaApi,checkBetaApi}

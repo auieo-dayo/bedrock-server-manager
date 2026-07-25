@@ -1,6 +1,6 @@
-const { EmbedBuilder } = require("discord.js");
-const { Types } =require("../../logger");
-const { formatDate } = require("../../formatDate");
+import { EmbedBuilder } from "discord.js"
+import {Types} from "../../logger.js"
+import { formatDate } from "../../formatDate.js" 
 
 async function block(message,type,player,block,minutes,logm,dontskipTnt=false) {
     const conditions = []
@@ -55,4 +55,4 @@ async function block(message,type,player,block,minutes,logm,dontskipTnt=false) {
 
 }
 
-module.exports = block
+export default block

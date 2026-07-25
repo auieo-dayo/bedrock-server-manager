@@ -1,4 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
+import { v4 } from "uuid"
 
 class wstoken {
     constructor(tokentimeout=60000) {
@@ -6,7 +6,7 @@ class wstoken {
         this.tokens = new Map()
     }
     gettoken() {
-        const token = uuidv4()
+        const token = v4()
 
         const id = setTimeout(()=>{
             this.tokens.delete(token)
@@ -26,4 +26,4 @@ class wstoken {
     }
 }
 
-module.exports = wstoken;
+export default wstoken;

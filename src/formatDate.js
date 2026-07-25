@@ -4,7 +4,7 @@
  * @param {Date} date 
  * @returns {String}
  */
-function formatDate(date) {
+export function formatDate(date) {
   const pad = (n) => n.toString().padStart(2, '0');
 
   const yyyy = date.getFullYear();
@@ -22,7 +22,7 @@ function formatDate(date) {
  * @param {Date} end 
  * @returns {String}
  */
-function msToYMDHMS(start,end) {
+export function msToYMDHMS(start,end) {
     let years = end.getUTCFullYear() - start.getUTCFullYear();
     let months = end.getUTCMonth() - start.getUTCMonth();
     let days = end.getUTCDate() - start.getUTCDate();
@@ -50,4 +50,4 @@ function msToYMDHMS(start,end) {
     return parts.join(' ');
 }
 
-module.exports = {formatDate,msToYMDHMS}
+

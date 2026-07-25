@@ -1,6 +1,6 @@
-const { EmbedBuilder } = require("discord.js");
-const os = require("os");
-const { getCpuUsage } = require("../../../cpuusage");
+import { EmbedBuilder } from "discord.js"; 
+import os from "os"
+import { getCpuUsage } from "../../../cpuusage.js"
 
 
 async function d(message,logm) {
@@ -31,4 +31,4 @@ async function d(message,logm) {
     await message.editReply({embeds:[embed]})
 }
 
-module.exports = d
+export default d

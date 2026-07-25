@@ -1,7 +1,7 @@
-const Database = require("better-sqlite3")
-const config = require("../config/config")
+import config from "../config/config.js"
+import Database from "better-sqlite3"
 
-const Types = {
+export const Types = {
     events: {
         BDS:0,
         chat:1,
@@ -21,7 +21,7 @@ const Types = {
     }
 }
 
-class Logger {
+export class Logger {
     constructor (dbpath) {
         this.dbpath = dbpath
         this.db = new Database(this.dbpath)
@@ -214,4 +214,3 @@ class Logger {
     }
 }
 
-module.exports = {Logger,Types}

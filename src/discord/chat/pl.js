@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+import { EmbedBuilder } from "discord.js"
 
 
 async function pl(onlinePlayer,message) {
@@ -14,4 +14,4 @@ async function pl(onlinePlayer,message) {
     await message.reply({ embeds: [embed] });
 }
 
-module.exports = pl
+export default pl

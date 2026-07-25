@@ -1,4 +1,4 @@
-const walcheckpoint = require("./debug/walcheckpoint")
-const def = require("./debug/default") 
-const status = require("./debug/status")
-module.exports = {default:def,walcheckpoint,status}
+import walcheckpoint from "./debug/walcheckpoint.js"
+import def from "./debug/default.js"
+import status from "./debug/status.js"
+export default {default:def,walcheckpoint,status}

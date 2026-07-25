@@ -38,4 +38,4 @@ function r (backup,target,message,bds) {
     
 }
 
-module.exports = r
+export default r

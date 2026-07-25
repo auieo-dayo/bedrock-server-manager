@@ -1,9 +1,9 @@
-const fs = require('fs-extra');
-const crypto = require("crypto")
-const path = require("path")
-const chalk = require("chalk");
-const config = require('../config/config');
-const {ZipArchive} = require("archiver");
+import crypto from "crypto"
+import fs from "fs-extra"
+import path from "path"
+import chalk from "chalk"
+import config from "../config/config.js"
+import {ZipArchive} from "archiver"
 
 
 
@@ -565,4 +565,4 @@ class Backup {
     }
 }
 
-module.exports = Backup
+export default Backup

@@ -16,6 +16,14 @@ const config = {
         // プレイヤーの退出を標準出力に表示
         "leavePlayerLogToConsole": true
     },
+    "autoUpdate": {
+        "Minecraft": {
+            // BDSを自動で更新するか
+            "enabled": true,
+            // プレビュー版サーバーを使用するか
+            "isPreview": false
+        }
+    },
     "Discord": {
         // ディスコードBotトークン
         "TOKEN":"",
@@ -100,4 +108,4 @@ const config = {
         "trustProxy": false
     }
 }
-module.exports = config
+export default config

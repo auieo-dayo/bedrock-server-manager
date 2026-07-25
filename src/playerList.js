@@ -24,4 +24,4 @@ class PlayerStore {
   }
 }
 
-module.exports = PlayerStore
+export default PlayerStore

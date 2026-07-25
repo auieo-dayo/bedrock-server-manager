@@ -1,10 +1,10 @@
-const os = require('os');
+import os from "os"
 /**
  * CPU使用率を取得（%）
  * @param {number} interval 測定間隔（ミリ秒）
  * @returns {Promise<number>} CPU使用率（百分率）
  */
-async function getCpuUsage(interval = 1000) {
+export async function getCpuUsage(interval = 1000) {
   function cpuTimes() {
     const cpus = os.cpus();
     let user = 0, nice = 0, sys = 0, idle = 0, irq = 0;
@@ -31,4 +31,3 @@ async function getCpuUsage(interval = 1000) {
   const usage = (1 - idleDiff / totalDiff) * 100;
   return usage;
 }
-module.exports = {getCpuUsage}

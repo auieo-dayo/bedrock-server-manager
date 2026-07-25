@@ -20,4 +20,4 @@ async function l(backup,message,) {
     message.editReply(md)
     
 }
-module.exports = l
+export default l

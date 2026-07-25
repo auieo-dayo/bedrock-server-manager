@@ -1,6 +1,7 @@
-const { EmbedBuilder } = require("discord.js");
-const config = require("../../../config/config.js");
-const { Types } = require("../../logger.js");
+import { EmbedBuilder } from "discord.js";
+import config from "../../../config/config.js";
+import {Types} from "../../logger.js";
+
 
 async function d(playername,message,channel,logger) {
   if (!channel) return
@@ -30,4 +31,4 @@ async function d(playername,message,channel,logger) {
   
   await message.reply({ embeds: [embed] });
 }
-module.exports = d
+export default d

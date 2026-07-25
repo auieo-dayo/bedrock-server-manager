@@ -1,5 +1,5 @@
-const fs = require("fs-extra")
-const path = require("path")
+import fs from "fs-extra"
+import path from "path"
 
 class BanManager {
     constructor(root) {
@@ -89,4 +89,4 @@ class BanManager {
     }
 
 }
-module.exports = BanManager
+export default BanManager

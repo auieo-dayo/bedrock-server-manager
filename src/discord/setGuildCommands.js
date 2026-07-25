@@ -1,9 +1,9 @@
-const { ApplicationCommandOptionType } = require("discord.js")
+import { ApplicationCommandOptionType } from "discord.js"
 
 /**
  * @type {import("discord.js").ApplicationCommandDataResolvable[]}
  */
-const commandlist = [
+export const commandlist = [
     {
         name:"pl",
         description: "プレイヤーリストを表示します。",
@@ -199,8 +199,7 @@ const commandlist = [
  * @param {*} guildid 
  * @returns 
  */
-async function setCommands(client,guildid) {
+export async function setCommands(client,guildid) {
     const res = await client.application.commands.set(commandlist,String(guildid))
     return res
 }
-module.exports = {commandlist,setCommands}

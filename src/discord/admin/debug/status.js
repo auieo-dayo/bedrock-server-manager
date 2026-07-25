@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+import { EmbedBuilder } from "discord.js"
 /**
  * 
  * @param {boolean} process_alive 
@@ -21,4 +21,4 @@ async function status(message,process_alive,BSMVer,BDSver,latestBackup,isLatestB
     await message.reply({embeds:[embed]})
 }
 
-module.exports = status
+export default status

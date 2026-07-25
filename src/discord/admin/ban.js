@@ -1,6 +1,7 @@
-const ban = require("./ban/ban")
-const isbanned = require("./ban/isbanned")
-const list = require("./ban/list")
-const pardon = require("./ban/pardon")
+import ban from "./ban/ban.js"
+import isbanned from "./ban/isbanned.js"
+import list from "./ban/ban.js"
+import pardon from "./ban/ban.js"
 
-module.exports = {ban,isbanned,list,pardon}
+
+export default{ban,isbanned,list,pardon}

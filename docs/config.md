@@ -1,6 +1,6 @@
 # 設定ドキュメント
 
-BSW（Bedrock Server Wrapper）の設定について説明します。設定は `config.js` ファイルで行います。`config.sample.js` をコピーして `config.js` に変更します
+BSM（Bedrock Server Manager）の設定について説明します。設定は `config.js` ファイルで行います。`config.sample.js` をコピーして `config.js` に変更します
 
 ---
 
@@ -15,7 +15,7 @@ BSW（Bedrock Server Wrapper）の設定について説明します。設定は 
 | `chatLogToConsole`  | boolean | チャットメッセージを標準出力に表示するか |
 | `deathLogToConsole` | boolean | プレイヤー死亡ログを標準出力に表示するか |
 | `backupLogToConsole` | boolean | バックアップログを標準出力に表示するか |
-| `bswSystemLogToConsole` | boolean | BSWシステムログを標準出力に表示するか |
+| `bsmSystemLogToConsole` | boolean | BSMシステムログを標準出力に表示するか |
 | `joinPlayerLogToConsole` | boolean | プレイヤー参加を標準出力に表示するか |
 | `leavePlayerLogToConsole` | boolean | プレイヤー退出を標準出力に表示するか |
 
@@ -26,7 +26,7 @@ BSW（Bedrock Server Wrapper）の設定について説明します。設定は 
     "chatLogToConsole": true,
     "deathLogToConsole": true,
     "backupLogToConsole": true,
-    "bswSystemLogToConsole": true,
+    "bsmSystemLogToConsole": true,
     "joinPlayerLogToConsole": true,
     "leavePlayerLogToConsole": true
 }
@@ -36,7 +36,7 @@ BSW（Bedrock Server Wrapper）の設定について説明します。設定は 
 
 ## 2. Discord（Discord連携設定）
 
-BSWをDiscord Botと連携させて、チャットや通知をDiscordに送信できます。
+BSMをDiscord Botと連携させて、チャットや通知をDiscordに送信できます。
 
 ### メイン設定
 
@@ -237,4 +237,4 @@ Web管理画面にアクセスする際の設定です。`webUi` 内で `basicAu
 1. `config.sample.js` をコピーしてファイル名を `config.js` に変更します
 2. `config.js` をテキストエディタで開き、必要な設定を変更します
 3. Discord Botを使用する場合は、`TOKEN` フィールドに DiscordのBotトークンを入力し、`guildId` に使うサーバーのIDを入力してください
-4. 設定が完了したら、BSWを起動すると新しい設定が適用されます
+4. 設定が完了したら、BSMを起動すると新しい設定が適用されます

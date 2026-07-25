@@ -64,10 +64,10 @@ class BDS {
 
             if (/^\[.* INFO\] Version: .*$/.test(line)) {
                 this.BDSver = line.match(/Version:\s*([0-9].*)/)[1]
-                if (config.console.bswSystemLogToConsole) console.log(chalk.bgBlue(`BDS-Version:${this.BDSver}`))
+                if (config.console.bsmSystemLogToConsole) console.log(chalk.bgBlue(`BDS-Version:${this.BDSver}`))
             }
             if (/^\[.* INFO\] Server started./.test(line)) {
-                if (config.console.bswSystemLogToConsole) console.log(chalk.bgBlue("Server Started"))
+                if (config.console.bsmSystemLogToConsole) console.log(chalk.bgBlue("Server Started"))
                 this.server_started = true
                 this.emit("started")
             }

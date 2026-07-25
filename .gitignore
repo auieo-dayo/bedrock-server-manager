@@ -142,7 +142,7 @@ vite.config.ts.timestamp-*
 .vscode/
 
 
-#BSW関連
+#BSM関連
 bds/*
 !bds/memo.txt
 log/

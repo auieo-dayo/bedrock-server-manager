@@ -2,12 +2,12 @@ const { EmbedBuilder } = require("discord.js");
 /**
  * 
  * @param {boolean} process_alive 
- * @param {string} BSWver 
+ * @param {string} BSMVer 
  * @param {string | null} BDSver 
  * @param {number | null} latestBackup 
  * @param {boolean | null} isLatestBackupFull
  */
-async function status(message,process_alive,BSWver,BDSver,latestBackup,isLatestBackupFull) {
+async function status(message,process_alive,BSMVer,BDSver,latestBackup,isLatestBackupFull) {
     const embed = new EmbedBuilder()
     embed.setTitle("Status")
     embed.setTimestamp(new Date())
@@ -15,7 +15,7 @@ async function status(message,process_alive,BSWver,BDSver,latestBackup,isLatestB
     embed.addFields(
         {name:"BDS-Alive",value:process_alive ? "🟢" : "🔴"},
         {name:"BDS-ver",value:BDSver || "Offline",inline:true},
-        {name:"BSW-ver",value:BSWver,inline:true},
+        {name:"BSM-ver",value:BSMVer,inline:true},
         {name:"LatestBackup",value:`${backupD} | ${isLatestBackupFull ? "FULL" : "Diff"}`},
     )
     await message.reply({embeds:[embed]})

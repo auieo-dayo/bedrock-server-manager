@@ -23,7 +23,7 @@ async function d(message,logm) {
     embed.addFields(
         {name:"models",value:`CPU:${cpu}%(${cpumodel})\nメモリ:${memPer}%(${memFree.toFixed(0)}GB/${memTotal.toFixed(0)}GB)`},
         {name:"System-Uptime",value:`<t:${systemUptime}:S>`,inline:true},
-        {name:"BSW-Uptime",value:`<t:${processUptime}:S>`,inline:true},
+        {name:"BSM-Uptime",value:`<t:${processUptime}:S>`,inline:true},
         {name:"DB-events",value:`${events_count?.count || 0}件`},
         {name:"DB-blockEvents",value:`${blockEvents_count?.count || 0}件`}
     )

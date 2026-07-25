@@ -1,4 +1,4 @@
-// Bedrock Server Wrapper  - Default-Server-Addon
+// Bedrock Server Manager  - Default-Server-Addon
 import {CommandPermissionLevel, system , world, CustomCommandParamType, PlayerCursorInventoryComponent, Entity, BlockTypes, Player, EntityComponentTypes, DimensionType, DimensionTypes, EffectType, EffectTypes, EntityDamageCause, EntityComponent, EquipmentSlot, InputButton, GameMode, ItemType, ItemTypes, ItemComponentTypes } from"@minecraft/server";
 import * as ui from "@minecraft/server-ui";
 import { SecretString, transferPlayer } from "@minecraft/server-admin";
@@ -58,7 +58,7 @@ function atob(str) {
 }
 
 
-let BSW_SendPW = null
+let BSM_SendPW = null
 
 
 
@@ -66,7 +66,7 @@ console.log(JSON.stringify({"type":"Request","cmd":"SyncConfRequest","source":``
 
 function post(body,retry=0) {
     system.run(async()=>{
-        if (!BSW_SendPW || !port) {
+        if (!BSM_SendPW || !port) {
             console.error("Don't have SendPW")
             console.log(JSON.stringify({"type":"Request","cmd":"SyncConfRequest","source":``,"data":"","isEntity":false}))
         }
@@ -75,7 +75,7 @@ function post(body,retry=0) {
             if (!body.type) return
             const req = new net.HttpRequest(`http://localhost:${port || 3000}/api/bds/send`)
             req.setMethod("Post")
-            req.addHeader("authorization",BSW_SendPW)
+            req.addHeader("authorization",BSM_SendPW)
             req.addHeader('Content-Type', 'application/json')
             req.setBody(JSON.stringify(body))
             const res = await net.http.request(req)
@@ -197,9 +197,9 @@ system.runInterval(()=>{
 system.beforeEvents.startup.subscribe((ev)=>{
     
     // アラート
-    console.log("[BSW-ADDON-ALEART] ===========================================================")
-    console.log("[BSW-ADDON-ALEART] BSWを使用しない場合はこのアドオンを抜くことを強く推奨します")
-    console.log("[BSW-ADDON-ALEART] ===========================================================")
+    console.log("[BSM-ADDON-ALEART] ===========================================================")
+    console.log("[BSM-ADDON-ALEART] BSMを使用しない場合はこのアドオンを抜くことを強く推奨します")
+    console.log("[BSM-ADDON-ALEART] ===========================================================")
 
     ev.customCommandRegistry.registerCommand({
         name:"auieo:backup",
@@ -321,7 +321,7 @@ system.beforeEvents.startup.subscribe((ev)=>{
             } else if (json.type == "syncConf") {
                 const pass = json.data.pass
                 port = json.data.port
-                BSW_SendPW = new SecretString(`Basic ${btoa(`BDS_Send:${pass}`)}`)
+                BSM_SendPW = new SecretString(`Basic ${btoa(`BDS_Send:${pass}`)}`)
                 console.log(`Catch SendPW`)
             }
         })

@@ -1,14 +1,15 @@
 {
-  "name": "bedrock-server-wrapper",
-  "version": "7.2.7",
+  "name": "bedrock-server-manager",
+  "version": "8.0.0",
   "main": "main.js",
   "scripts": {
     "start": "node main.js"
   },
-  "keywords": [],
+  "keywords": ["minecraft","minecraftserver","bedrock","minecraftbedrock"],
+  "homepage": "bsm.auieo.f5.si",
   "author": "auieo-dayo",
   "license": "MIT",
-  "description": "",
+  "description": "Minecraft Bedrock Server Manager",
   "dependencies": {
     "archiver": "^8.0.0",
     "better-sqlite3": "^12.9.0",

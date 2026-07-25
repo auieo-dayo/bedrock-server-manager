@@ -1,7 +1,7 @@
 // これはサンプル用コンフィグファイルです。
 // コンフィグを適用するにはファイル名をconfig.jsに変えてください。
 const config = {
-    // BSWの標準出力に出すものを選択
+    // BSMの標準出力に出すものを選択
     "console": {
         // チャットを標準出力に表示
         "chatLogToConsole": true,
@@ -9,8 +9,8 @@ const config = {
         "deathLogToConsole": true,
         // バックアップログを標準出力に表示
         "backupLogToConsole": true,
-        // その他のBSW関係を標準出力に表示
-        "bswSystemLogToConsole": true,
+        // その他のBSM関係を標準出力に表示
+        "bsmSystemLogToConsole": true,
         // プレイヤーの参加を標準出力に表示
         "joinPlayerLogToConsole": true,
         // プレイヤーの退出を標準出力に表示
@@ -23,7 +23,7 @@ const config = {
         "enabled":false,
         // このBOTを使うサーバーID
         "guildId": "",
-        // ディスコードにBSWの情報を送信するか
+        // ディスコードにBSMの情報を送信するか
         "notifications": {
             "chat": {
                 // チャットを送受信するか

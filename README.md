@@ -1,7 +1,7 @@
 
-# BSW(Bedrock Server Wrapper)
+# BSM(Bedrock Server Manager)
 
-BSW は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールです。サーバー設定の同期、ログ収集、バックアップ、自動通知、Webダッシュボード、WebSocketコンソールなどを提供します。
+BSM は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールです。サーバー設定の同期、ログ収集、バックアップ、自動通知、Webダッシュボード、WebSocketコンソールなどを提供します。
 
 これによってマイクラ統合版サーバーの管理が三倍楽になります。(体感)
 
@@ -40,7 +40,7 @@ npm install
 
 ## BetaAPI について
 
-BSW はワールド起動時に **BetaAPI** の状態を自動判定・管理します。
+BSM はワールド起動時に **BetaAPI** の状態を自動判定・管理します。
 
 ### 初回起動時の挙動
 - **ワールドが存在しない場合**: ワールド初期生成の後、自動再起動時に BetaAPI を有効にします
@@ -51,7 +51,7 @@ BSW はワールド起動時に **BetaAPI** の状態を自動判定・管理し
 > - 元の `level.dat` は `level.dat.old` としてバックアップされます
 
 ## 設定
-- `config.js`：BSW の設定（WebUI, Discord, backup 等）
+- `config.js`：BSM の設定（WebUI, Discord, backup 等）
 詳しくは[docs/config.md](docs/config.md) を参照してください。
 
 - `.env`：BDS の `server.properties` に対応する設定（`server-name`, `gamemode`, `level-name` など）
@@ -135,14 +135,14 @@ Discord Bot用のトークン等 を設定すると、以下のアプリケー�
 - **status** - サーバー稼働状況
   - BDS稼働状況（🟢オンライン/🔴オフライン）
   - BDSバージョン
-  - BSWバージョン
+  - BSMバージョン
   - 最新バックアップ情報と種別（FULL/Diff）
 
 - **default** - システムリソース情報
   - CPU使用率とCPUモデル
   - メモリ使用率と空き容量
   - システムアップタイム
-  - BSWアップタイム
+  - BSMアップタイム
   - DBイベント件数
 
 - **walcheckpoint** - WALチェックポイント実行

@@ -1,4 +1,4 @@
-// Bedrock Server Wrapper
+// Bedrock Server Manager
 const path = require("path")
 const WebSocket = require('ws');
 const dotenv = require("dotenv");
@@ -59,10 +59,10 @@ const dbpath = path.join(__dirname,"datas","app.db")
 fs.ensureDirSync(path.dirname(dbpath))
 const logm = new Logger.Logger(dbpath)
 
-const BSWVer = require("./package.json").version
+const BSMVer = require("./package.json").version
 // StartupText
-console.log(chalk.bgBlue(`BSW By auieo-dayo\nVersion:${BSWVer}`))
-logm.Server(`BSW by auieo-dayo | Ver:${BSWVer}`,true)
+console.log(chalk.bgBlue(`BSM By auieo-dayo\nVersion:${BSMVer}`))
+logm.Server(`BSM by auieo-dayo | Ver:${BSMVer}`,true)
 
 // BDS Check
 if (!fs.pathExistsSync(BDS_file)) {
@@ -263,7 +263,7 @@ if (config.webUi.basicAuth.enable) {
   app.use('/', basicAuth({
     users: { [config.webUi.username ?? "admin"] : config.webUi.password ?? "admin" },
     challenge: true,           // 認証ダイアログを出す
-    realm: 'BSW-DashBoard-Login'         // ダイアログに表示される領域名
+    realm: 'BSM-DashBoard-Login'         // ダイアログに表示される領域名
   }));
 } else console.log(chalk.bgGreen("[WEB] DISABLED BASICAUTH"))
 
@@ -357,7 +357,7 @@ async function getinfo() {
       "cpu": {
         "par": cpu
       },
-      BSWVer
+      BSMVer
     }
     }
 }
@@ -477,7 +477,7 @@ app.use((err, req, res,next) => {
 
 const wss = new WebSocket.Server({ noServer: true, path: "/ws" });
 
-if (config.console.bswSystemLogToConsole) console.log(chalk.bgBlue(`WebSocket Ready`))
+if (config.console.bsmSystemLogToConsole) console.log(chalk.bgBlue(`WebSocket Ready`))
 
 const wsl = new wslimit(60000,10)
 server.on("upgrade", (req, socket, head) => {
@@ -533,7 +533,7 @@ ws.on('message', (message) => {
 
 const start = async () => {
   server.listen(PORT,"0.0.0.0",() => {
-    if (config.console.bswSystemLogToConsole) console.log(chalk.bgBlue(`WebServer&WebSocket Ready(http://localhost:${PORT})`))
+    if (config.console.bsmSystemLogToConsole) console.log(chalk.bgBlue(`WebServer&WebSocket Ready(http://localhost:${PORT})`))
   });
 };
 
@@ -695,7 +695,7 @@ const sendStartEmbed= async()=>{
 }
 let discordstarted = false
 client.once(discord.Events.ClientReady, async () => {
-    if (config.console.bswSystemLogToConsole) console.log(chalk.bgBlue(`[Discord]Login success: ${client.user.tag}`));
+    if (config.console.bsmSystemLogToConsole) console.log(chalk.bgBlue(`[Discord]Login success: ${client.user.tag}`));
     
     // Channel取得
     try {
@@ -1025,7 +1025,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     // Info(デフォルト)
     if (!option || option === "Info") return await discordCommands.admin.debug.default(interaction,logm);
     if (option === "WalCheckPoint") return await discordCommands.admin.debug.walcheckpoint(logm,interaction);
-    if (option === "Status") return await discordCommands.admin.debug.status(interaction,bds.isProcessAlive().alive,BSWVer,bds.BDSver,latestbackup.time,latestbackup.isfull)
+    if (option === "Status") return await discordCommands.admin.debug.status(interaction,bds.isProcessAlive().alive,BSMVer,bds.BDSver,latestbackup.time,latestbackup.isfull)
     
   }
 })
@@ -1127,7 +1127,7 @@ try {
     if (search_flag) bp_packlist[search_index].version = manifest.header.version
     if (!search_flag) bp_packlist.push({"pack_id":addon_uuid,"version":manifest.header.version})
     await fs.writeFile(path.join(bp_packlist_path),JSON.stringify(bp_packlist,null,2))
-    if (config.console.bswSystemLogToConsole) console.log(chalk.bgBlue("defaultAdd-on copy success"))
+    if (config.console.bsmSystemLogToConsole) console.log(chalk.bgBlue("defaultAdd-on copy success"))
     logm.Server(`defaultAdd-on copy success`)
     
     WSbroadcast({"type":"server","datatype":"str","data":"defaultAdd-on copy success"})
@@ -1268,8 +1268,8 @@ const LineSkipList = [
 
 // BDS line
 bds.on('line', (line) => {
-// [BSW-ADDON-ALEART]
-  if(/^\[.* INFO\] \[Scripting\] \[BSW-ADDON-ALEART\].*/.test(line)) return {skip:true}
+// [BSM-ADDON-ALEART]
+  if(/^\[.* INFO\] \[Scripting\] \[BSM-ADDON-ALEART\].*/.test(line)) return {skip:true}
   
   if (/^\[.* INFO\] \[Scripting\] \{"type":".*","cmd":".*","source":".*","data":".*","isEntity":.*\}/.test(line)) {
     const json = JSON.parse(line.match(/\{"type":".*","cmd":".*","source":".*","data":".*","isEntity":.*\}/)[0])

@@ -191,6 +191,23 @@ export const commandlist = [
                 ]
             }
         ]
+    },
+    {
+        name: "update",
+        description: "BDSのアップデートに関する操作",
+        defaultMemberPermissions: "Administrator",
+        options: [
+            {
+                name: "option",
+                description: "オプション",
+                type: ApplicationCommandOptionType.String,
+                required: true,
+                choices: [
+                    {name:"CheckUpdate",value:"checkupdate"},
+                    {name:"StartUpdate",value:"startupdate"},
+                ]
+            }
+        ]
     }
 ]
 /**

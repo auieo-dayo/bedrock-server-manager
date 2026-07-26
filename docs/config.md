@@ -152,7 +152,36 @@ BSMをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 
 ---
 
-## 3. backup（自動バックアップ設定）
+## 4. update（BDSアップデート設定）
+
+BDSのアップデート設定を管理します。
+
+### プロパティ
+
+| プロパティ | 型      | 説明                                  |
+| -------- | ------ | ------------------------------------- |
+| `enabled` | boolean | BDSの更新機能を有効化するか               |
+| `isPreview` | boolean | プレビュー版のサーバーを使用するか    |
+
+### 設定例
+
+```javascript
+"update": {
+    "Minecraft": {
+        "enabled": true,
+        "isPreview": false
+    }
+}
+```
+
+### 説明
+
+- `enabled`: BDSのアップデート機能を有効化すると、Discordより更新開始コマンドが使用できます。
+- `isPreview`: `true` に設定するとプレビュー版BDSを使用します。
+
+---
+
+## 4. backup（自動バックアップ設定）
 
 サーバーワールドの自動バックアップを設定します。
 
@@ -180,7 +209,7 @@ BSMをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 
 ---
 
-## 4. webUi（Web UI設定）
+## 5. webUi（Web UI設定）
 
 Web管理画面にアクセスする際の設定です。`webUi` 内で `basicAuth` を設定できます。
 
@@ -210,7 +239,7 @@ Web管理画面にアクセスする際の設定です。`webUi` 内で `basicAu
 
 ---
 
-## 5. blockLog（ブロックログ設定）
+## 6. blockLog（ブロックログ設定）
 
 ブロックの設置・破壊・爆発ログを記録する設定です。
 

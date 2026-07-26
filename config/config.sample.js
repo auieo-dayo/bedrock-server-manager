@@ -16,9 +16,9 @@ const config = {
         // プレイヤーの退出を標準出力に表示
         "leavePlayerLogToConsole": true
     },
-    "autoUpdate": {
+    "update": {
         "Minecraft": {
-            // BDSを自動で更新するか
+            // BDSを更新できるようにするか
             "enabled": true,
             // プレビュー版サーバーを使用するか
             "isPreview": false

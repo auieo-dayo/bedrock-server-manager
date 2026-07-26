@@ -18,6 +18,7 @@ BSM は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールで�
 - 自動バックアップ（差分）
 - Web ダッシュボードと RESTAPI
 - WebSocket によるリアルタイムログ/コマンド送信
+- ディスコードからによるBDSの半自動アップデート
 
 ## ドキュメント
 - config.js: [docs/config.md](docs/config.md)
@@ -125,6 +126,13 @@ Discord Bot用のトークン等 を設定すると、以下のアプリケー�
 **例**: 
 - `/block` - 全ブロックイベント
 - `/block type:place player:Player1 block:diamond_ore minutes:60` - 詳細な絞り込み
+
+#### `/update` - BDSアップデート操作
+BDSのアップデート状態を確認したり、アップデートを開始できます。
+
+**オプション:**
+- `CheckUpdate` - 更新があるか確認します
+- `StartUpdate` - 新しいBDSをダウンロードして適用します
 
 #### `/debug` - デバッグ情報取得
 デバッグ情報を取得します。

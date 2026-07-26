@@ -17,6 +17,7 @@ class fetchBDS {
         this.root = root
         this.folder = path.join(root,"temp","FetchBDS")
         this.BDS_path = BDS_path
+        this.updating = false
     }
     /**
      * BDSの最新バージョンをAPIから取得する
@@ -36,22 +37,22 @@ class fetchBDS {
         const version = {
             Linux: {
                 Preview: {
-                    url: linux.href,
-                    version: linux.pathname.match(/(?<=bedrock-server-).*(?=\.zip)/)[0]
-                },
-                Release: {
                     url: linuxPre.href,
                     version: linuxPre.pathname.match(/(?<=bedrock-server-).*(?=\.zip)/)[0]
+                },
+                Release: {
+                    url: linux.href,
+                    version: linux.pathname.match(/(?<=bedrock-server-).*(?=\.zip)/)[0]
                 }
             },
             Windows: {
                 Preview: {
-                    url: win.href,
-                    version: win.pathname.match(/(?<=bedrock-server-).*(?=\.zip)/)[0]
-                },
-                Release: {
                     url: winPre.href,
                     version: winPre.pathname.match(/(?<=bedrock-server-).*(?=\.zip)/)[0]
+                },
+                Release: {
+                    url: win.href,
+                    version: win.pathname.match(/(?<=bedrock-server-).*(?=\.zip)/)[0]
                 }
             },
             Java: json.result.links.find((v)=>(v.downloadType === "serverJar")).downloadUrl
@@ -63,67 +64,114 @@ class fetchBDS {
      * BDSを取得する
      * @param {boolean} isPreview 
      * @param {"Windows"|"Linux"} OS
+     * @param {Promise<ReturnType<typeof this.getLatestVersion>>} versionList 
      */
-    async fetchBDS(isPreview=false,OS) {
-        if (!["Windows","Linux"].includes(OS)) return;
-        const versionList = await this.getLatestVersion()
-        const version = versionList[OS][isPreview?"Preview":"Release"];
-        
-        // BDSの取得
-        console.log(chalk.green(`[FetchBDS] - Fetching BDS(${version.version} ${isPreview?"Preview":""})`))
-        let res = await fetch(version.url);
-        let buf = await res.arrayBuffer()
+    async fetchBDS(isPreview=false,OS,versionList) {
+        try {
+            if (this.updating) return
+            if (!["Windows","Linux"].includes(OS)) return;
+            const version = versionList[OS][isPreview?"Preview":"Release"];
+            this.updating = true
+            // BDSの取得
+            console.log(chalk.green(`[FetchBDS] - Fetching BDS(${version.version} ${isPreview?"Preview":""})`))
+            let res = await fetch(version.url);
+            let buf = await res.arrayBuffer()
 
-        const notUpdateSavedFileList = []
-        // 一度復旧がめんどいファイル逃がす
-        for (const file of notUpdateFileList) {
-            const p = path.join(this.BDS_path,file)
-            if (!await fs.pathExists(p)) continue;
-            const dest =  path.join(this.root,"temp","FetchBDS",file)
-            await fs.ensureDir(path.dirname(dest))
-            await fs.copyFile(p,dest)
-            notUpdateSavedFileList.push({src:p,dest})
-        }
-
-        // zip解凍
-        console.log(chalk.green(`[FetchBDS] - Extracting BDS`))
-        let directory = await unziper.Open.buffer(Buffer.from(buf))
-
-        for (const file of directory.files) {
-            const out = path.join(this.BDS_path, file.path);
-
-            if (file.type === "Directory") {
-                await fs.ensureDir(out,{ recursive: true });
-                continue;
+            const notUpdateSavedFileList = []
+            // 一度復旧がめんどいファイル逃がす
+            for (const file of notUpdateFileList) {
+                const p = path.join(this.BDS_path,file)
+                if (!await fs.pathExists(p)) continue;
+                const dest =  path.join(this.root,"temp","FetchBDS",file)
+                await fs.ensureDir(path.dirname(dest))
+                await fs.copyFile(p,dest)
+                notUpdateSavedFileList.push({src:p,dest})
             }
 
-            await fs.ensureDir(path.dirname(out), { recursive: true });
-            
+            // zip解凍
+            console.log(chalk.green(`[FetchBDS] - Extracting BDS`))
+            let directory = await unziper.Open.buffer(Buffer.from(buf))
+
+            for (const file of directory.files) {
+                const out = path.join(this.BDS_path, file.path);
+
+                if (file.type === "Directory") {
+                    await fs.ensureDir(out,{ recursive: true });
+                    continue;
+                }
+
+                await fs.ensureDir(path.dirname(out), { recursive: true });
+                
 
 
-            await new Promise((resolve, reject) => {
-                file.stream()
-                    .pipe(fs.createWriteStream(out))
-                    .on("finish", resolve)
-                    .on("error", reject);
-            });
+                await new Promise((resolve, reject) => {
+                    file.stream()
+                        .pipe(fs.createWriteStream(out))
+                        .on("finish", resolve)
+                        .on("error", reject);
+                });
+            }
+            // LinuxだけBDSに実行権限つける
+            if (os.platform() === "linux" && OS === "Linux") {
+                fs.chmod(path.join(this.BDS_path,"bedrock_server"),0o755)
+            }
+            // ここで一応メモリ開放
+            buf = null;
+            res = null;
+            directory = null
+            // 逃したファイルをもとに戻す
+            for (const file of notUpdateSavedFileList) {
+                await fs.ensureDir(path.dirname(file.src))
+                await fs.copyFile(file.dest,file.src)
+                await fs.remove(file.dest)
+            }
+            console.log(chalk.green(`[FetchBDS] - Complated Download and Extracted BDS`))
+            this.updating = false
+        } catch(e) {
+            this.updating = false
+            throw e
         }
-        // LinuxだけBDSに実行権限つける
-        if (os.platform() === "linux" && OS === "Linux") {
-            fs.chmod(path.join(this.BDS_path,"bedrock_server"),0o755)
-        }
-        // ここで一応メモリ開放
-        buf = null;
-        res = null;
-        directory = null
-        // 逃したファイルをもとに戻す
-        for (const file of notUpdateSavedFileList) {
-            await fs.ensureDir(path.dirname(file.src))
-            await fs.copyFile(file.dest,file.src)
-            await fs.remove(file.dest)
-        }
-        console.log(chalk.green(`[FetchBDS] - Complated Download and Extracted BDS`))
+    }
+    /**
+     * 対応してるOSしか取得できません
+     * @returns {string | null}
+     */
+    getRunningOS() {
+        const r = {win32:"Windows",linux:"Linux"}[os.platform()]
+        return r?r:null
+    }
 
+
+    /**
+     * 
+     * @param {"start"|"stop"|"restoreStart"|"restoreEnd"} event 
+     * @param {Function} callback 
+     */
+    on(event, callback) {
+        if (!this._events[event]) {
+            this._events[event] = []
+        }
+        this._events[event].push(callback)
+    }
+    /**
+     * 
+     * @param {"start"|"stop"|"restoreStart"|"restoreEnd"} event 
+     * @param {Function} callback 
+     */
+    off(event, callback) {
+        if (!this._events[event]) return
+        this._events[event] = this._events[event].filter(fn => fn !== callback)
+    }
+    /**
+     * 
+     * @param {"start"|"stop"|"restoreStart"|"restoreEnd"} event 
+     * @param {...any} args 
+     */
+    emit(event, ...args) {
+        if (!this._events[event]) return
+        for (const fn of this._events[event]) {
+            fn(...args)
+        }
     }
 };
 

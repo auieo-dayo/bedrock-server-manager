@@ -43,6 +43,7 @@ class BDS {
         this.started = true
 
         this.bds.on("close",(code)=>{
+            if (!this.started) return;
             this.emit("close",code)
             this.started = false
         })
@@ -88,6 +89,12 @@ class BDS {
                 const xuid = Number(line.replace(/^\[.* INFO\] Player disconnected: .*, xuid: /,"").replace(/, pfid: .*$/,""))
                 const json = {"name":playername,"tags":[""],xuid}
                 this.emit("leave",json)
+            }
+
+            if (/^\[.* ERROR\] Exiting program/.test(line)) {
+                this.started = false
+                this.emit("close","?",true)
+                this.bds.kill()
             }
             
             if (res?.skip) return

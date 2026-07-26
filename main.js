@@ -57,7 +57,7 @@ const dbpath = path.join(root,"datas","app.db")
 await fs.ensureDir(path.dirname(dbpath))
 const logm = new Logger.Logger(dbpath)
 
-const BSMVer = await fs.readJSON("package.json").version
+const BSMVer = (await fs.readJSON("package.json")).version
 // StartupText
 console.log(chalk.bgBlue(`BSM By auieo-dayo\nVersion:${BSMVer}`))
 logm.Server(`BSM by auieo-dayo | Ver:${BSMVer}`,true)
@@ -74,19 +74,15 @@ const fetchBDS = new fetchbds(root,BDS_path)
 // BDS Check
 if (!await fs.pathExists(BDS_file)) {
   console.log(chalk.green("BDSの存在を確認できませんでした。DLします。"))
-  await fetchBDS.fetchBDS(config.autoUpdate.Minecraft.isPreview,{win32:"Windows",linux:"Linux"}[runningOS])
+  logm.Server("[fetchBDS] - BDSが見つからないので取得しています")
+  await fetchBDS.fetchBDS(config.update.Minecraft.isPreview,fetchBDS.getRunningOS(),await fetchBDS.getLatestVersion())
+  logm.Server("[fetchBDS] - 完了しました")
 }
-
-
 
 
 // BDS properties Path
 
 const properties_path = path.join(BDS_path,"server.properties")
-const properties = PropertiesReader({sourceFile:properties_path});
-
-// BDS properties edit
-
 const env_list = [
   "server-name",
   "gamemode",
@@ -99,17 +95,19 @@ const env_list = [
   "level-name",
   "allow-list"
 ]
-
-for (const item of env_list) {
-if (typeof process.env[item] == "undefined") continue;
-properties.set(item,process.env[item])
+// BDS properties edit
+async function syncEnv() {
+  const properties = PropertiesReader({sourceFile:properties_path});
+  for (const item of env_list) {
+    if (typeof process.env[item] == "undefined") continue;
+    properties.set(item,process.env[item])
+  }
+  properties.set("content-log-console-output-enabled","true")
+  await properties.save(properties_path);
 }
-properties.set("content-log-console-output-enabled","true")
-await properties.save(properties_path);
-
+await syncEnv()
 
 // default_server_addon module config
-
 const DSD_modules = [
     "@minecraft/server",
     "@minecraft/server-ui",
@@ -117,6 +115,7 @@ const DSD_modules = [
     "@minecraft/server-net"
 ]
 const DSD_modules_path = path.join(BDS_path,"config","default","permissions.json")
+async function setModuleConfig() {
 const nowDSD_modules = await fs.readJSON(DSD_modules_path)
 DSD_modules.map((item)=>{
   if (!nowDSD_modules.allowed_modules.includes(item)) {
@@ -124,7 +123,8 @@ DSD_modules.map((item)=>{
   }
 })
 await fs.writeJSON(DSD_modules_path,nowDSD_modules)
-
+}
+await setModuleConfig()
 
 
 // WebServer
@@ -947,6 +947,45 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     }
   }
 
+  // ボタンの場合
+  if (interaction.isButton()) {
+    const buttonid = interaction.customId
+    // BDSのアップデートなら
+    if (/^bdsUpdate_\d+_\d+/.test(buttonid)) {
+      await interaction.update({components:[]})
+      // 本人以外なら
+      if (buttonid.split("_")[2] !== interaction.user.id) {
+        await interaction.followUp({content:"本人以外は実行できません。"});
+        return
+      }
+      // アップデート中なら
+      if (fetchBDS.updating) {
+        await interaction.followUp({content:"アップデート中です"});
+        return
+      }
+      
+      const timeout = buttonid.split("_")[1]
+      if (timeout < Date.now()) return;
+      
+      const msg = await interaction.followUp({content:"アップデート中です...(BDSの終了待機中)"})
+
+      const onClose = async() =>{
+        msg.edit({content:"アップデート中です...(コピー,展開中)"})
+        bds.off("close",onClose)
+        await fetchBDS.fetchBDS(config.update.Minecraft.isPreview,fetchBDS.getRunningOS(),await fetchBDS.getLatestVersion())
+        msg.edit({content:"アップデート中です...(その他初期化処理)"})
+        await syncEnv()
+        await setModuleConfig()
+        await addon_copy()
+        msg.edit({content:"アップデートが完了しました"})
+        bds.restart()
+      }
+      bds.on("close",onClose)
+      bds.exit()
+
+    }
+  }
+
   // コマンド以外ならreturn
 
   if (!interaction.isCommand()) return;
@@ -1028,7 +1067,52 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
     if (!option || option === "Info") return await discordCommands.admin.debug.default(interaction,logm);
     if (option === "WalCheckPoint") return await discordCommands.admin.debug.walcheckpoint(logm,interaction);
     if (option === "Status") return await discordCommands.admin.debug.status(interaction,bds.isProcessAlive().alive,BSMVer,bds.BDSver,latestbackup.time,latestbackup.isfull)
-    
+  }
+  // Update系コマンド
+  if (commandName === "update") {
+    const option = interaction.options.getString("option")
+    switch (option) {
+      case "startupdate": {
+        if (!config.update.Minecraft.enabled) return interaction.reply({content:"更新処理は無効になっています"}) 
+        await interaction.deferReply()
+        const latestVersionList = await fetchBDS.getLatestVersion()
+        const latestVersion = latestVersionList[fetchBDS.getRunningOS()][`${config.update.Minecraft.isPreview?"Preview":"Release"}`].version
+        const embed = new discord.EmbedBuilder()
+        embed.setTimestamp(new Date())
+
+        const button = new discord.ButtonBuilder()
+          .setCustomId(`bdsUpdate_${Date.now() + 1000*60*5}_${interaction.user.id}`)
+          .setLabel("アップデート")
+          .setStyle(discord.ButtonStyle.Primary);
+        
+          if (bds.BDSver !== latestVersion) {
+          embed.setTitle("更新しますか？")
+          embed.setDescription(`動作中:**${bds.BDSver}**\n更新可:**${latestVersion}**`)
+          const row = new discord.ActionRowBuilder()
+              .addComponents(button);
+          await interaction.editReply({embeds:[embed],components:[row]})
+        } else {
+          embed.setTitle("アップデートがありません")
+          await interaction.editReply({embeds:[embed]})
+        }
+        break;
+      }
+      case "checkupdate": {
+        await interaction.deferReply()
+        const latestVersionList = await fetchBDS.getLatestVersion()
+        const latestVersion = latestVersionList[fetchBDS.getRunningOS()][`${config.update.Minecraft.isPreview?"Preview":"Release"}`].version
+        const embed = new discord.EmbedBuilder()
+        embed.setTimestamp(new Date())
+        if (bds.BDSver !== latestVersion) {
+          embed.setTitle("アップデートがあります")
+          embed.setDescription(`動作中:**${bds.BDSver}**\n更新可:**${latestVersion}**`)
+        } else {
+          embed.setTitle("アップデートがありません")
+        }
+        await interaction.editReply({embeds:[embed]})
+        break;
+      }
+    }
   }
 })
 
@@ -1200,7 +1284,7 @@ const startIntervalBackup = ()=>{
     setInterval(async() => {
       const list = await backup.waitForPreparationsComplete(bds)
       await backup.backup(list,false,false,onlinePlayer,bds);
-    }, 1000 * 60 * BackupInterval);
+    }, 1000 * 60 * config.backup.interval);
   }
   bds.off("started",startIntervalBackup)
 }
@@ -1396,5 +1480,5 @@ bds.on('close', async(code,iserr) => {
     if (stop) await client.destroy()
   }
   onlinePlayer.fullSync([])
-  if (stop) process.exit(0);
+  if (stop || iserr) process.exit(0);
 });

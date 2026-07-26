@@ -125,7 +125,7 @@ class fetchBDS {
                 await fs.copyFile(file.dest,file.src)
                 await fs.remove(file.dest)
             }
-            console.log(chalk.green(`[FetchBDS] - Complated Download and Extracted BDS`))
+            console.log(chalk.green(`[FetchBDS] - Completed Download and Extracted BDS`))
             this.updating = false
         } catch(e) {
             this.updating = false

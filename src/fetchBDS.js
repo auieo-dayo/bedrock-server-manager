@@ -3,6 +3,18 @@ import path from "path"
 import chalk from "chalk"
 import unziper from "unzipper"
 import os from "os"
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return "0 B";
+
+    const units = ["B", "KB", "MB", "GB", "TB", "PB"];
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${units[i]}`;
+}
 
 
 const urlListURL = "https://net-secondary.web.minecraft-services.net/api/v1.0/download/links"
@@ -75,7 +87,37 @@ class fetchBDS {
             // BDSの取得
             console.log(chalk.green(`[FetchBDS] - Fetching BDS(${version.version} ${isPreview?"Preview":""})`))
             let res = await fetch(version.url);
-            let buf = await res.arrayBuffer()
+
+            // チャンク溜め
+            let chunks = []
+
+            // 進捗表示
+            const starttime = Date.now()
+            let total = Number(res.headers.get("content-length"))
+            let downloaded = 0
+            for await (const chunk of res.body) {
+                chunks.push(chunk)
+                downloaded += chunk.length
+                let text = ""
+                // total取れてないときはパーセンテージを計算しない
+                if (!Number.isNaN(total)) {
+                    text=`${((downloaded / total) * 100).toFixed(1)}% | `
+                }
+                // 経過時間
+                const elapsed = Math.max((Date.now() - starttime) / 1000, 0.001);
+                // DLスピード(Byte/s)
+                const speed = downloaded / elapsed;
+                text+=`${formatBytes(downloaded,0)}/${formatBytes(total,0)} | ${formatBytes(speed,0)}/s`
+                // total取れてないときはETAも計算しない
+                if (!Number.isNaN(total)) {
+                    const remain = (total - downloaded) / speed;
+                    text += ` | ETA ${remain.toFixed(1)}s`;
+                }
+                process.stdout.write("\r\x1b[K" + chalk.green(`[FetchBDS] Downloading... ${text}`))
+            }
+            process.stdout.write("\n");
+
+            let buf = Buffer.concat(chunks)
 
             const notUpdateSavedFileList = []
             // 一度復旧がめんどいファイル逃がす
@@ -116,9 +158,9 @@ class fetchBDS {
                 fs.chmod(path.join(this.BDS_path,"bedrock_server"),0o755)
             }
             // ここで一応メモリ開放
+            directory = null
             buf = null;
             res = null;
-            directory = null
             // 逃したファイルをもとに戻す
             for (const file of notUpdateSavedFileList) {
                 await fs.ensureDir(path.dirname(file.src))

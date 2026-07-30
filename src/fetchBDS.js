@@ -100,7 +100,7 @@ class fetchBDS {
                 downloaded += chunk.length
                 let text = ""
                 // total取れてないときはパーセンテージを計算しない
-                if (!Number.isNaN(total) || total === 0) {
+                if (!Number.isNaN(total) && total !== 0) {
                     text=`${((downloaded / total) * 100).toFixed(1)}% | `
                 }
                 // 経過時間
@@ -109,7 +109,7 @@ class fetchBDS {
                 const speed = downloaded / elapsed;
                 text+=`${formatBytes(downloaded,0)}/${formatBytes(total,0)} | ${formatBytes(speed,0)}/s`
                 // total取れてないときはETAも計算しない
-                if (!Number.isNaN(total) || total === 0) {
+                if (!Number.isNaN(total) && total !== 0) {
                     const remain = (total - downloaded) / speed;
                     text += ` | ETA ${remain.toFixed(1)}s`;
                 }

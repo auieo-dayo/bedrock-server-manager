@@ -87,6 +87,8 @@ BSMをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 
 使用例：`?d PlayerName` または `?deathinfo PlayerName`
 
+> 注：プレフィックスコマンド（`?d` / `?deathinfo` など）は非推奨です。代わりに Discord のスラッシュコマンドを使用してください。例：`/d gamertag`
+
 ##### playerInfo（プレイヤー情報取得）
 
 プレイヤーの基本情報を管理者チャンネルから取得できます。
@@ -97,6 +99,8 @@ BSMをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 | `prefix`  | array   | コマンドプレフィックス。例：`?p`, `?playerinfo` |
 
 使用例：`?p PlayerName` または `?playerinfo PlayerName`
+
+> 注：プレフィックスコマンド（`?p` / `?playerinfo` など）は非推奨です。代わりに Discord のスラッシュコマンドを使用してください。例：`/p gamertag`
 
 ##### ban（BAN管理）
 
@@ -112,6 +116,8 @@ BSMをDiscord Botと連携させて、チャットや通知をDiscordに送信�
 - `?b isbanned PlayerName` - プレイヤーがBANされているか確認
 - `?b ban PlayerName reason` - プレイヤーをBAN
 - `?b pardon PlayerName` - プレイヤーのBANを解除
+
+> 注：プレフィックスコマンド（`?b` / `?ban` など）は非推奨です。代わりに Discord のスラッシュコマンドを使用してください。例：`/ban list`、`/ban isbanned gamertag`、`/ban ban gamertag reason`
 
 ### 設定例
 

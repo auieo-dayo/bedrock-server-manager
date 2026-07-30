@@ -42,7 +42,7 @@ const config = {
                 "channelId": ""
             },
             "serverStatus": {
-                // プレイヤー数が閾値を超えたら通知するか
+                // サーバーの起動/停止時にメッセージを送信するか
                 "enabled": true,
                 // 通知するチャンネルID
                 "channelId": ""

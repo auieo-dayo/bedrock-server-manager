@@ -18,7 +18,7 @@ function r (backup,target,message,bds) {
         
 
     const onclose = ()=>{
-        bds.off(onclose)
+        bds.off("close",onclose)
         setTimeout(() => {
             backup.restore(targetdate)
                 .then(()=>{

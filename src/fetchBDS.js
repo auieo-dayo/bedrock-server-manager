@@ -132,6 +132,7 @@ class fetchBDS {
 
             // zip解凍
             console.log(chalk.green(`[FetchBDS] - Extracting BDS`))
+            await fs.ensureDir(this.BDS_path)
             let directory = await unziper.Open.buffer(Buffer.from(buf))
 
             for (const file of directory.files) {

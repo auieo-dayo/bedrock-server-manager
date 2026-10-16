@@ -2,7 +2,7 @@
 import path from "path"
 import WebSocket , {WebSocketServer} from "ws"
 import dotenv from "dotenv"
-dotenv.config();
+dotenv.config({path:`.env`});
 import PropertiesReader from "properties-reader";
 import fs from "fs-extra"
 import chalk from "chalk"

@@ -27,7 +27,7 @@ BSM は Node.js ベースの BDS (Bedrock Dedicated Server) 管理ツールで�
 - WebSocket: [docs/Websocket.md](docs/Websocket.md)
 
 ## 必要条件
-- Linux か Windowsの実行環境
+- Linux か Windowsの実行環境(Macは非対応)
 - Node.js 22 以上
 
 ## セットアップ

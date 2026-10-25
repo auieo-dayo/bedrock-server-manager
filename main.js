@@ -26,6 +26,7 @@ import * as Logger from "./src/logger.js"
 import betaApi from "./src/enableBetaApi.js"
 import jobmanager from "./src/jobManagaer.js";
 import fetchbds from "./src/fetchBDS.js";
+import serverUdpPorts from "./src/sup-parse.js"
 
 // project-root
 
@@ -93,7 +94,9 @@ const env_list = [
   "server-portv6",
   "level-seed",
   "level-name",
-  "allow-list"
+  "allow-list",
+  "transport",
+  "server-udp-ports"
 ]
 // BDS properties edit
 async function syncEnv() {
@@ -106,6 +109,21 @@ async function syncEnv() {
   await properties.save(properties_path);
 }
 await syncEnv()
+
+// serverUdpPortsの表示
+if (process.env["transport"] === "nethernet") {
+  const sup = serverUdpPorts(process.env["server-udp-ports"])
+  let tex = "[Server-UDP-Ports-Settings-Checker] - "
+  if (!sup.iserr) {
+    tex += sup.IP ? `${sup.IP}向けに`:""
+    tex += `内部ポート:${sup.localport.start}から${sup.localport.end}を`
+    tex += sup.publictport.start && sup.publictport.end ? `外部ポート:${sup.publictport.start}から${sup.publictport.end}向けに公開する前提の設定です`:"公開する前提の設定です"
+    console.log(chalk.green(tex))
+  } else {
+    tex += `server-udp-portsが設定されていないか設定値が不正です。他プレイヤーがサーバーに参加できない可能性があります。`
+    console.log(chalk.bgRed(tex))
+  }
+}
 
 // default_server_addon module config
 const DSD_modules = [
@@ -351,6 +369,12 @@ async function getinfo() {
         "player": {
           "max": Number(process.env["max-players"]),
           "now": onlinePlayer.getAll().length
+        },
+        "port": {
+          "type": process.env["transport"],
+          "server-udp-ports": process.env["server-udp-ports"],
+          "server-port": process.env["server-port"],
+          "server-portv6": process.env["server-portv6"]
         },
         "version": bds.BDSver
       },
@@ -1494,15 +1518,16 @@ process.on('uncaughtException',err => {
 
 // BDS Close
 
-bds.on('close', async(code,iserr) => {
+bds.on('close', async(code,iserr,sig) => {
   console.log(chalk.green(`BDS終了(${code})`));
 
   if (!stop && !BetaApiEnable.enabled && BetaApiEnable.restart && !iserr) {
     BetaApiEnable.run().then(()=>bds.restart())
   }
 
-  if (config.Discord.enabled && config.Discord.notifications.toAdmin.enabled && client.isReady()&& code !== 0) {
-    await channels.admin.send({"content":`BDSが終了コード\`${code}\`で異常終了しました。`})
+  if (config.Discord.enabled && config.Discord.notifications.toAdmin.enabled && client.isReady()) {
+    if (code !== 0) await channels.admin.send({"content":`BDSが終了コード:\`${code}\`で異常終了しました。`});
+    if (sig) await channels.admin.send({"content":`BDSがシグナル:\`${sig}\`で終了しました。`});
   }
 
 

@@ -41,9 +41,9 @@ class BDS {
             output: this.bds.stdin,
         });
         this.started = true
-        this.bds.on("close",(code)=>{
+        this.bds.on("close",(code,sig)=>{
             if (!this.started) return;
-            this.emit("close",code)
+            this.emit("close",code,undefined,sig)
             this.started = false
         })
         this.bds.on("error",(err)=>{
@@ -52,7 +52,7 @@ class BDS {
             throw err
         })
 
-
+         
         this.rl.on("line",(_line)=>{
             const line = _line
                 // なぜかたまについちゃうやつ

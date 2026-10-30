@@ -27,7 +27,7 @@ export default function serverUdpPorts(sup="") {
     }
     
 
-    const loc = String(ports[1]).split("-")
+    const loc = String(ports[1]||"").split("-")
     if (typeof loc[0] !== "undefined" && typeof loc[1] !== "undefined") {
         result.localport.start = loc[0]
         result.localport.end = loc[1]

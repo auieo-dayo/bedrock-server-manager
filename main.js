@@ -14,7 +14,7 @@ import os from "os"
 import wslimit from "./src/wslatelimit.js"
 import wstoken from "./src/wstoken.js";
 const wst = new wstoken(60000)
-import config from "./config/config.js";
+import config from "./src/config.js";
 import playerstore from "./src/playerList.js"
 import BanManager from "./src/ban.js"
 import discordCommands from "./src/discord/commands.js"
@@ -56,7 +56,7 @@ let servername = process.env["server-name"]
 
 const dbpath = path.join(root,"datas","app.db")
 await fs.ensureDir(path.dirname(dbpath))
-const logm = new Logger.Logger(dbpath)
+const logm = new Logger.Logger(dbpath,config)
 
 const BSMVer = (await fs.readJSON("package.json")).version
 // StartupText
@@ -1173,7 +1173,7 @@ client.on(discord.Events.InteractionCreate,async (interaction)=>{
 const backup_path = path.join(root,"backup",servername,worldname)
 
 
-const backup = new Backup(root,BDS_path,backup_path,worldname,JobManager)
+const backup = new Backup(root,BDS_path,backup_path,worldname,JobManager,config)
 
 const latestbackup = {isfull:false,time:0}
 backup.on("start",(isfull)=>{

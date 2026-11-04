@@ -1,6 +1,6 @@
 import path from "path"
 import fetchbds from "../src/fetchBDS.js";
-import config from "../config/config.js"
+import config from "../src/config.js"
 import readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 

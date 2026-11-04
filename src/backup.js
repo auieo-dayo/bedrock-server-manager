@@ -2,7 +2,6 @@ import crypto from "crypto"
 import fs from "fs-extra"
 import path from "path"
 import chalk from "chalk"
-import config from "../config/config.js"
 import {ZipArchive} from "archiver"
 
 
@@ -82,12 +81,13 @@ async function walkDir(dir, relativePath = "") {
 
 
 class Backup {
-    constructor(root,BDS_path,backup_path,worldname,JobManager) {
+    constructor(root,BDS_path,backup_path,worldname,JobManager,config) {
         this.root = root
         this.bpath = backup_path
         this.BDS = BDS_path
         this.worldname = worldname
         this.JobManager = JobManager
+        this.config = config
 
         this.exportedBackupRemoveTime = 1000*60*15
 
@@ -105,7 +105,7 @@ class Backup {
     }
     
     waitForPreparationsComplete(bds) {
-        if (!config.backup.enabled) return
+        if (!this.config.backup.enabled) return
         if (!bds) return
         
         bds.sendCommand("save hold",true)
@@ -153,12 +153,12 @@ class Backup {
     }
     async backup(list,isfull=false,notskip=false,PlayerStore,bds,reason="unknown") {
         if (this.isrestoring) return bds.sendCommand("save resume",true)
-        if (!config.backup.enabled) return bds.sendCommand("save resume",true)
+        if (!this.config.backup.enabled) return bds.sendCommand("save resume",true)
         if (!list && !isfull) return bds.sendCommand("save resume",true)
         const elapsed = Date.now() - this.lastBackupForPlayerLeave;
-        const intervalMs = config.backup.interval * 60 * 1000;
+        const intervalMs = this.config.backup.interval * 60 * 1000;
         if (!notskip && reason === "playerleave" && elapsed < intervalMs) return bds.sendCommand("save resume",true)
-        if (!notskip && (typeof PlayerStore.getAll()[0] == "undefined" && config.backup.pauseIfNoPlayer)) return bds.sendCommand("save resume",true);
+        if (!notskip && (typeof PlayerStore.getAll()[0] == "undefined" && this.config.backup.pauseIfNoPlayer)) return bds.sendCommand("save resume",true);
 
         this.emit("start",isfull)
         this.isbackuping = true
@@ -507,8 +507,8 @@ class Backup {
     }
     async removeOld() {
         // 0(オフ)か負の値ならスキップ
-        if (config.backup.autoDeleteAfterDays <= 0) return
-        const safe = new Date(Date.now() - config.backup.autoDeleteAfterDays*24*60*60*1000)
+        if (this.config.backup.autoDeleteAfterDays <= 0) return
+        const safe = new Date(Date.now() - this.config.backup.autoDeleteAfterDays*24*60*60*1000)
         // this.bpath/yyyy/MM/dd/hh-mm-ss(_FULL)
 
         // 年の比較

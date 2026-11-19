@@ -1,4 +1,4 @@
-import {formatDate} from "../../../formatDate"
+import {formatDate} from "../../../formatDate.js"
 
 // content[1]
 async function pardon(playername,bm,message) {

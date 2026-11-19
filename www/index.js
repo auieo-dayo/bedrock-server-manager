@@ -69,30 +69,29 @@ async function backupset(data) {
 
 
 
-let type = 0
 function set(t=NaN) {
   switch(t) {
     case 0 :
-      type = 0
       document.getElementById("backup_disp").style.display = "none"
       document.getElementById("console_disp").style.display = "none"
       document.getElementById("main_disp").style.display = "block"
       break;
     case 1 :
-      type = 1
       document.getElementById("backup_disp").style.display = "none"
       document.getElementById("console_disp").style.display = "block"
       document.getElementById("main_disp").style.display = "none"  
       break;
     case 2 :
-      type = 2
       document.getElementById("backup_disp").style.display = "block"
       document.getElementById("console_disp").style.display = "none"
       document.getElementById("main_disp").style.display = "none"  
       break;
     }
-
 }
+
+document.querySelectorAll(".SelBtn").forEach((ele)=>{
+  ele.addEventListener("click",()=>(set(Number(ele.dataset.id))))
+})
 
 const modes = [
   "Light",
@@ -215,8 +214,8 @@ setInterval(async()=>{
   document.getElementById("MemTotal").textContent = `${infojson.server.mem.total.toFixed(0)}GB`
   document.getElementById("MemPar").textContent = `${(infojson.server.mem.par).toFixed(0)}%`
   document.getElementById("cpu").textContent = `${infojson.server.cpu.par.toFixed(0)}%`
-  document.getElementById("cpupar").value = infojson.server.cpu.par.toFixed(0)
-  document.getElementById("mempar").value = infojson.server.mem.par.toFixed(0)
+  document.getElementById("cpupar").value = infojson.server.cpu.per.toFixed(0)
+  document.getElementById("mempar").value = infojson.server.mem.per.toFixed(0)
 
   document.getElementById("nowBDSver").textContent = infojson.BDS.version
   document.getElementById("latestBDSver").textContent = bdsver

@@ -382,10 +382,12 @@ async function getinfo() {
       "mem": {
         "free": os.freemem()/1073741824,
         "total": os.totalmem()/1073741824,
-        "par": 100-((os.freemem() / os.totalmem()) * 100)
+        "par": 100-((os.freemem() / os.totalmem()) * 100),
+        "per": 100-((os.freemem() / os.totalmem()) * 100)
       },
       "cpu": {
-        "par": cpu
+        "par": cpu,
+        "per": cpu
       },
       BSMVer
     }

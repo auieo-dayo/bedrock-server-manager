@@ -143,10 +143,10 @@
     "mem": {
       "free": 7.5,
       "total": 16,
-      "par": 53.125
+      "per": 53.125
     },
     "cpu": {
-      "par": 12.3
+      "per": 12.3
     }
   }
 }
@@ -166,8 +166,8 @@
 | `BDS.version`      | string | BDSのバージョン       |
 | `server.mem.free`  | number | 空きメモリ(GB)       |
 | `server.mem.total` | number | 総メモリ(GB)        |
-| `server.mem.par`   | number | メモリ使用率(%)       |
-| `server.cpu.par`   | number | CPU使用率(%)       |
+| `server.mem.per`   | number | メモリ使用率(%)       |
+| `server.cpu.per`   | number | CPU使用率(%)       |
 
 ---
 
@@ -340,10 +340,10 @@
       "mem": {
         "free": 7.5,
         "total": 16,
-        "par": 53.125
+        "per": 53.125
       },
       "cpu": {
-        "par": 12.3
+        "per": 12.3
       }
     }
   },

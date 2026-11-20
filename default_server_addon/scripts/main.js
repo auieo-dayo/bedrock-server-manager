@@ -93,10 +93,6 @@ function post(body,retry=0) {
 }
 
 
-function syncPlayer() {
-    const players = world.getAllPlayers().map((p)=>({"name":p.name,"tags":p.getTags()}))
-    post({"type":"syncplayerlist","data": players})
-}
 
 // プレイヤー退出ログ
 
@@ -185,11 +181,6 @@ world.beforeEvents.explosion.subscribe((ev)=>{
         blocks
     })
 })
-
-// プレイヤーリスト同期
-system.runInterval(()=>{
-    syncPlayer()
-},20*60*10)
 
 
 // コマンド

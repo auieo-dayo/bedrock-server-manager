@@ -233,21 +233,6 @@ app.post('/api/bds/send',async (req,res,next)=>{
         res.status(200).type("json").send({"status":true})
         break;
       }
-      case "syncplayerlist": {
-        const data = body?.data
-        if (Array.isArray(data) && data.every(item => 
-          typeof item === "object" &&
-          item !== null &&
-          typeof item.name === "string" &&
-          Array.isArray(item.tags) &&
-          item.tags.every(tag => typeof tag === "string")
-        )) {
-          onlinePlayer.fullSync(data)
-        }
-        res.status(200).type("json").send({"status":true})
-        
-        break;
-      }
       case "blockEvent": {
         if (![0,1,2].includes(body.action)) return res.status(400).type("json").send({"status":false});
 

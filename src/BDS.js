@@ -79,14 +79,14 @@ class BDS {
             if (/^\[.* INFO\] Player Spawned: .* xuid: .*, pfid:.*$/.test(line)) {
                 const playername = String(line.replace(/^\[.* INFO\] Player Spawned: /,"").replace(/ xuid:.*$/,""))
                 const xuid = Number(line.replace(/^\[.* INFO\] Player Spawned: .* xuid: /,"").replace(/, pfid: .*$/,""))
-                const json = {"name":playername,"tags":[""],xuid}
+                const json = {"name":playername,xuid}
                 this.emit("spawn",json)
             }
 
             if (/^\[.* INFO\] Player disconnected: .*, xuid: .*, pfid:.*$/.test(line)) {
                 const playername = String(line.replace(/^\[.* INFO\] Player disconnected: /,"").replace(/, xuid: .*, pfid: .*$/,""))
                 const xuid = Number(line.replace(/^\[.* INFO\] Player disconnected: .*, xuid: /,"").replace(/, pfid: .*$/,""))
-                const json = {"name":playername,"tags":[""],xuid}
+                const json = {"name":playername,xuid}
                 this.emit("leave",json)
             }
 

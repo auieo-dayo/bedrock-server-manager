@@ -29,7 +29,7 @@ class jobManager {
     /**
      * @param {string} jobid
      * @param {boolean} isfailed
-     * @param {object} result   
+     * @param {string} message   
      */
     middleJob(jobid,isfailed,message) {
         /**
@@ -38,7 +38,7 @@ class jobManager {
         const job = this.jobs.get(jobid)
         if (!job) return undefined;
         this.jobs.set(jobid,{...job,ended:false,isfailed,message,updateAt:Date.now()})
-        this.emit("middleJob",jobid,isfailed,result)
+        this.emit("middleJob",jobid,isfailed,message)
         return job
     }
     /**
@@ -105,11 +105,12 @@ class jobManager {
      * @param {string} jobid 
      * @param {boolean} isfailed
      * @param {any} result  
+     * @param {string} message 
      */
-    emit(event,jobid,isfailed,result) {
+    emit(event,jobid,isfailed,result,message) {
         if (!this._events[event]) return
         for (const fn of this._events[event]) {
-            fn(jobid,isfailed,result)
+            fn(jobid,isfailed,result,message)
         }
     }
 }

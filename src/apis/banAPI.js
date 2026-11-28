@@ -2,6 +2,8 @@
 /**@import BDS from "../BDS.js" */
 /**@import PlayerStore from "../playerList.js" */
 
+import {formatDate,msToYMDHMS} from "../formatDate.js"
+
 
 class BanAPI {
     /**
@@ -20,7 +22,7 @@ class BanAPI {
      * @param {string} playername 
      * @param {string|undefined} reason 
      * @param {{isdisocrd:boolean,author:string}} author 
-     * @param {number|undefined} expiredtime 解除までの時間(ms) 
+     * @param {number|undefined} expiredtime 解除までの時間(h) 
      */
     ban(playername,reason,author,__expiredtime) {
         if (!playername || !author) throw new Error("BAN API Validation Error");

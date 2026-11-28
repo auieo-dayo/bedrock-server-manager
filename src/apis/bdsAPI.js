@@ -43,38 +43,42 @@ class bdsAPI {
         const jobID = this.JobManager.addJob("Update");
 
         (async()=>{
-            if (this.fetchBDS.updating) {
-                this.JobManager.endJob(jobID,false,{version:this.BDSManager.BDSver},"update is already in progress.")
-                return
-            }
-            const latestVersionList = await this.fetchBDS.getLatestVersion()
-            const latestVersion = latestVersionList[this.fetchBDS.getRunningOS()][`${this.configManager.update.Minecraft.isPreview?"Preview":"Release"}`].version;
-            this.JobManager.middleJob(jobID,false,"FetchedVersionList")
-            
-            if (latestVersion === this.BDSManager.BDSver) {
-                this.JobManager.endJob(jobID,false,{version:latestVersion},"Not Updatable")
-                return
-            }
-            
-            this.JobManager.middleJob(jobID,false,"ExitingBDS")
-
-            const onClose = async() =>{
-                this.JobManager.middleJob(jobID,false,"Fetch and Extracting BDS")
+            try {
+                if (this.fetchBDS.updating) {
+                    this.JobManager.endJob(jobID,false,{version:this.BDSManager.BDSver},"update is already in progress.")
+                    return
+                }
+                const latestVersionList = await this.fetchBDS.getLatestVersion()
+                const latestVersion = latestVersionList[this.fetchBDS.getRunningOS()][`${this.configManager.update.Minecraft.isPreview?"Preview":"Release"}`].version;
+                this.JobManager.middleJob(jobID,false,"FetchedVersionList")
                 
-                this.BDSManager.off("close",onClose)
-                await this.fetchBDS(this.configManager.update.Minecraft.isPreview,this.fetchBDS.getRunningOS(),await this.fetchBDS.getLatestVersion())
+                if (latestVersion === this.BDSManager.BDSver) {
+                    this.JobManager.endJob(jobID,false,{version:latestVersion},"Not Updatable")
+                    return
+                }
                 
-                this.JobManager.middleJob(jobID,false,"Init BDS")
-                await this.utils.syncEnv()
-                await this.utils.setModuleConfig()
-                await this.utils.addon_copy()
+                this.JobManager.middleJob(jobID,false,"ExitingBDS")
+
+                const onClose = async() =>{
+                    this.JobManager.middleJob(jobID,false,"Fetch and Extracting BDS")
+                    
+                    this.BDSManager.off("close",onClose)
+                    await this.fetchBDS(this.configManager.update.Minecraft.isPreview,this.fetchBDS.getRunningOS(),await this.fetchBDS.getLatestVersion())
+                    
+                    this.JobManager.middleJob(jobID,false,"Init BDS")
+                    await this.utils.syncEnv()
+                    await this.utils.setModuleConfig()
+                    await this.utils.addon_copy()
 
 
-                this.BDSManager.restart()
-                this.JobManager.endJob(jobID,false,{version:latestVersion},"Restarting BDS")
+                    this.BDSManager.restart()
+                    this.JobManager.endJob(jobID,false,{version:latestVersion},"Restarting BDS")
+                }
+                this.BDSManager.on("close",onClose)
+                this.BDSManager.exit()
+            } catch(e) {
+                this.JobManager.endJob(jobID,true,e)
             }
-            this.BDSManager.on("close",onClose)
-            this.BDSManager.exit()
         })()
         return jobID
     }

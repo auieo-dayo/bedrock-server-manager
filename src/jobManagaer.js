@@ -79,6 +79,24 @@ class jobManager {
         const job = this.jobs.get(jobid)
         return job
     }
+
+    /**
+     * 
+     * @param {Event} event 
+     * @param {(jobid:string,isfailed:boolean,result:any)=>void} callback 
+     */
+
+    once(event, callback) {
+        // 1回実行されたら自身を解除するラッパー関数を作る
+        const wrapper = (...args) => {
+            this.off(event, wrapper);
+            callback(...args);
+        };
+
+        // 通常のonにラッパー関数を登録する
+        this.on(event, wrapper);
+    }
+
     /**
      * 
      * @param {Event} event 

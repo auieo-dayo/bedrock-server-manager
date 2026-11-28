@@ -53,6 +53,8 @@ class API {
      */
     getLog(__limit=250) {
         const limit = Number(__limit)
+        if (!Number.isSafeInteger(limit) || limit <= -1) throw new Error("getLog API Validation Error");
+
         // まずタイプ取得
         const logTypes = Object.keys(LoggerType.events)
         // 取得
@@ -110,19 +112,19 @@ class API {
         const json = JSON.stringify({"type":"getplayerinfo",playername,jobID}).replaceAll("\"","'").replaceAll("\\","\\\\'")
         
         this.BDSManager.sendCommand(`send "${json}"`,true)
-        const onEndJob = (jobid,__isfailed,result)=>{
-            if (jobID !== jobid) return;
-            clearTimeout(id)
-            resolve(result);
-        }
+
         /**@type {{type:string,playername:string,iserr:boolean,data:{dimension:string,location:{x:number,y:number,z:number},hp:{now:number,max:number},gamemode:string,mainhand:string},jobID:string}} */
         const result = await new Promise((resolve,reject)=>{
             const id = setTimeout(()=>{
                 reject(new Error("Get PlayerInfo Timeout."))
             },1000*15)
-            this.JobManager.on("endJob",onEndJob)
+            const onEndJob = (jobid,__isfailed,result)=>{
+                if (jobID !== jobid) return;
+                clearTimeout(id)
+                resolve(result);
+            }
+            this.JobManager.once("endJob",onEndJob)
         })
-        this.JobManager.off("endJob",onEndJob)
 
         return result
     }
@@ -151,7 +153,7 @@ class API {
         if (!playername || !Number.isSafeInteger(limit) || limit <= -1) throw new Error("PlayerDeathInfo API Validation Error");
         // time,type,player,message,metadata
         /**@type {{time:number,type:number,player:string,message:string,metadata:string}[]} */
-        const res = this.LogManager.db.prepare(`SELECT * FROM events WHERE type = ${LoggerType.events.death} AND player = ? ORDER BY time DESC LIMIT ?`).all(playername,((Number(limit) >= 1) ? Number(limit) : 250))
+        const res = this.LogManager.db.prepare(`SELECT * FROM events WHERE type = ${LoggerType.events.death} AND player = ? ORDER BY time DESC LIMIT ?`).all(playername,limit)
         const organizedContent = res.map((value)=>{
             /**@type {{reason:string,dimension:string,location:{x:number,y:number,z:number}}}*/
             const metadata = JSON.parse(value.metadata)
@@ -183,11 +185,11 @@ class API {
             }
             // 最初でも最後でもないかつ2種以上あるなら
             else if (i !== 0 && arr.length-1 !== i && arr.length >= 2) {
-                conditions.push("OR typeid = ?")
+                conditions.push("typeid = ? OR")
             }
             // 最後かつ2種以上あるなら
             else if (arr.length-1 === i && arr.length >= 2) {
-                conditions.push("OR typeid = ? )")
+                conditions.push("typeid = ? )")
             }
             // それ以外なら
             else {

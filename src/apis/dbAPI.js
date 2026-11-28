@@ -14,9 +14,9 @@ class dbAPI {
     }
 
     async getSize() {
-        const folder = path.join("..","..","data")
+        const folder = path.dirname(this.LogManager.dbpath)
         const DB = await fs.stat(path.join(folder,"app.db"))
-        const Wal = await fs.stat(path.join(folder,"app.wal"))
+        const Wal = await fs.stat(path.join(folder,"app.db-wal"))
         return {db:DB.size,wal:Wal.size}
     }
 
@@ -24,8 +24,8 @@ class dbAPI {
         const result = {}
         const tables = this.LogManager.db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';").all()
         for (const table of tables) {
-            const count = this.LogManager.db.prepare(`SELECT COUNT(*) FROM ${table}`).get()
-            result[table] = count
+            const count = this.LogManager.db.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get()
+            result[table] = count.count
         }
         return result
     }

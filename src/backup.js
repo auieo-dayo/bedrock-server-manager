@@ -102,6 +102,8 @@ class Backup {
 
         this.isbackuping = false
         this.isrestoring = false
+        
+        this.emit("init")
     }
     
     waitForPreparationsComplete(bds) {
@@ -239,7 +241,7 @@ class Backup {
         this.emit("stop")
         this.isbackuping = false
         if (bds) bds.sendCommand("save resume",true);
-        }
+    }
     async getlist(source, returnfullbackup = false) {
         const date = new Date();
         const yyyy_now = pad(date.getFullYear());
@@ -251,7 +253,6 @@ class Backup {
         const all_list = [];
         const today_list = [];
 
-        // helper: ディレクトリだけ返す（軽量版）
         const onlyDirs = async (target) => {
             try {
                 const list = await fs.readdir(target, { withFileTypes: true });
@@ -369,6 +370,10 @@ class Backup {
         const applyList = list.slice(startIndex);
         return {applyList,target:datetext}
     }
+    /**
+     * @param {number} target 
+     * @returns {{jobID:string}|void}
+     */
     exportBackup(target) {
         const date = new Date(target)
         if (typeof date?.getTime() === "undefined" || Number.isNaN(date?.getTime())) {
@@ -455,7 +460,7 @@ class Backup {
     async restore(target) {
         try {
             await this.waitForBackupEnd()
-            if (this.isrestoring) return
+            if (this.isrestoring) return {success:false,message:"Already running."}
 
             const date = new Date(target)
 
@@ -500,6 +505,7 @@ class Backup {
             console.log(chalk.bgGreen(`Completed Restore from Backups`))
             this.emit("restoreEnd",date)
             this.isrestoring = false
+            return {success:true,message:"Restore success."}
         }catch(e){
             this.isrestoring = false
             throw new Error(e)
@@ -562,7 +568,7 @@ class Backup {
     }
     /**
      * 
-     * @param {"start"|"stop"|"restoreStart"|"restoreEnd"} event 
+     * @param {"start"|"stop"|"restoreStart"|"restoreEnd"|"init"} event 
      * @param {Function} callback 
      */
     off(event, callback) {
@@ -571,7 +577,7 @@ class Backup {
     }
     /**
      * 
-     * @param {"start"|"stop"|"restoreStart"|"restoreEnd"} event 
+     * @param {"start"|"stop"|"restoreStart"|"restoreEnd"|"init"} event 
      * @param {...any} args 
      */
     emit(event, ...args) {

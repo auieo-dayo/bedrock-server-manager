@@ -284,7 +284,7 @@ system.beforeEvents.startup.subscribe((ev)=>{
                     }
                 }
             } else if (json.type == "getplayerinfo") {
-                const {playername} = json
+                const {playername,jobID} = json
                 
                 const returnjson = {"type":"playerinfo",playername,"iserr":false,"data": {
                     "dimension": "",
@@ -292,7 +292,7 @@ system.beforeEvents.startup.subscribe((ev)=>{
                     "hp": {"now":NaN,"max":20},
                     "gamemode": "",
                     "mainhand": ""
-                }}
+                },jobID}
 
                 const player = world.getAllPlayers().find((p)=>{
                     return p.name == playername
@@ -314,6 +314,9 @@ system.beforeEvents.startup.subscribe((ev)=>{
                 port = json.data.port
                 BSM_SendPW = new SecretString(`Basic ${btoa(`BDS_Send:${pass}`)}`)
                 console.log(`Catch SendPW`)
+            } else if (json.type == "kick") {
+                const {message,playername} = json.data
+                world.getAllPlayers().find((v)=>(v.name === playername)).runCommand(`kick @s "${atob(message)}"`)
             }
         })
       })

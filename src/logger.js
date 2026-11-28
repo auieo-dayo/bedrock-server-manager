@@ -25,6 +25,9 @@ export class Logger {
         this.dbpath = dbpath
         this.config = config
         this.db = new Database(this.dbpath)
+
+        this.lastUpdate = {events:null,blockevents:null}
+
         // WALモードに
         this.db.exec(`PRAGMA journal_mode = WAL;`)
         
@@ -82,6 +85,7 @@ export class Logger {
         const prefix = isdiscord ? "[D]" :""
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
         prepare.run(Date.now(),Types.events.chat,player,`${prefix}${player}:${message}`,JSON.stringify({isdiscord,message}))
+        this.lastUpdate.events = Date.now();
     }
     /**
      * @param {string} line 
@@ -90,6 +94,7 @@ export class Logger {
         if (typeof line !== "string") throw new Error(`${line} is not string(line)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
         prepare.run(Date.now(),Types.events.BDS,null,line,null)
+        this.lastUpdate.events = Date.now();
     }
     /**
      * @param {string} data 
@@ -101,7 +106,7 @@ export class Logger {
         if (isstartuptext) metadata = {isStartUp:true}
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
         prepare.run(Date.now(),Types.events.server,null,data,JSON.stringify(metadata))
-        
+        this.lastUpdate.events = Date.now();
     }
     /**
      * @param {string} player 
@@ -116,6 +121,7 @@ export class Logger {
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
         prepare.run(Date.now(),Types.events.death,player,`${player}(${reason})`,JSON.stringify({reason,location,dimension}))
+        this.lastUpdate.events = Date.now();
     }
     /**
      * @param {string} data 
@@ -123,7 +129,8 @@ export class Logger {
     Cmd(data) {
         if (typeof data !== "string") throw new Error(`[${data}] Validation error(data)`) 
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.cmd,null,data,null)     
+        prepare.run(Date.now(),Types.events.cmd,null,data,null)
+        this.lastUpdate.events = Date.now();
     }
     /**
      * @param {string} player 
@@ -131,7 +138,8 @@ export class Logger {
     PlayerJoin(player) {
         if (typeof player !== "string") throw new Error(`${player} is not string(player)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.PlayerJoin,player,null,null)          
+        prepare.run(Date.now(),Types.events.PlayerJoin,player,null,null)
+        this.lastUpdate.events = Date.now();
     }
     /**
      * @param {string} player 
@@ -142,7 +150,8 @@ export class Logger {
         if (typeof player !== "string") throw new Error(`${player} is not string(player)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO events (time,type,player,message,metadata) VALUES (?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.events.PlayerLeave,player,null,JSON.stringify({location,dimension}))  
+        prepare.run(Date.now(),Types.events.PlayerLeave,player,null,JSON.stringify({location,dimension}))
+        this.lastUpdate.events = Date.now();
     }
 
     // blockevents
@@ -159,7 +168,8 @@ export class Logger {
         if (typeof typeid !== "string") throw new Error(`${typeid} is not string(typeid)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.blockevents.actiontype.PlaceBlock,player,typeid,dimension,location.x,location.y,location.z)  
+        prepare.run(Date.now(),Types.blockevents.actiontype.PlaceBlock,player,typeid,dimension,location.x,location.y,location.z)
+        this.lastUpdate.blockevents = Date.now();
     }
     /**
      * 
@@ -174,7 +184,8 @@ export class Logger {
         if (typeof typeid !== "string") throw new Error(`${typeid} is not string(typeid)`)
         if(typeof dimension != "string") throw new Error(`[${dimension}] is not string(dimension)`)
         const prepare = this.db.prepare(`INSERT INTO blockevents (time,actiontype,player,typeid,dimension,x,y,z) VALUES (?,?,?,?,?,?,?,?)`)
-        prepare.run(Date.now(),Types.blockevents.actiontype.BreakBlock,player,typeid,dimension,location.x,location.y,location.z)  
+        prepare.run(Date.now(),Types.blockevents.actiontype.BreakBlock,player,typeid,dimension,location.x,location.y,location.z)
+        this.lastUpdate.blockevents = Date.now();
     }
 
     /**
@@ -203,6 +214,7 @@ export class Logger {
             }
         })
         insert(blocks)
+        this.lastUpdate.blockevents = Date.now();
     }
 
     BlockLogRemoveOld() {
@@ -210,6 +222,7 @@ export class Logger {
         const deleteBefore = new Date(Date.now() - (1000*60*60*24*this.config.blockLog.autoDeleteAfterDays))
         const res = this.db.prepare(`DELETE FROM blockevents WHERE time <= ?`).run(deleteBefore.getTime())
         if (res.changes >= 0) console.log(`${this.config.blockLog.autoDeleteAfterDays}日以上前のブロックログを${res.changes}件消去しました。`)
+        this.lastUpdate.blockevents = Date.now();    
         return res
     }
 }

@@ -229,7 +229,7 @@ app.post('/api/bds/send',async (req,res,next)=>{
         break;
       }
       case "playerinfo": {
-        PlayerinfotoDis(body)
+        JobManager.emit("endJob",body.jobID,false,body)
         res.status(200).type("json").send({"status":true})
         break;
       }
@@ -256,6 +256,7 @@ app.post('/api/bds/send',async (req,res,next)=>{
   }
 })
 
+// ここから普通にダッシュボードとかのAPI
 
 // lateLimit
 const limit = rateLimit({
@@ -284,16 +285,11 @@ app.get('/api/getwstoken',(req,res,next)=>{
   }
 })
 
-app.get('/api/getbdspw', async (req, res, next) => {
-  try {
-    if (!["127.0.0.1","::1","::ffff:127.0.0.1"].includes(req.socket?.remoteAddress)) return res.sendStatus(404);
-    const json = {"password": BDSsendPass}
-    res.type("json").send(JSON.stringify(json,null,2))
-  }catch (err) {
-    next(err)
-  }
-  
-});
+
+
+
+
+
 
 app.get('/api/getlog', async (req, res, next) => {
   try {
@@ -1354,7 +1350,7 @@ bds.on("started",()=>{
 bds.on("spawn",(json)=>{
   logm.PlayerJoin(json.name)
   WSbroadcast({"type":"PlayerJoin","data":json.name})
-  onlinePlayer.join(json)
+  onlinePlayer.join({...json,joined:Date.now()})
   LLtoDis(json.name,"join")
   if (bm.isbanned(json.name,true)) {
     const baninfo = bm.getinfo(json.name)

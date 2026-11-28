@@ -24,7 +24,7 @@ class BanAPI {
      */
     ban(playername,reason,author,__expiredtime) {
         if (!playername || !author) throw new Error("BAN API Validation Error");
-        const expiredtime = Date.now()+expired*60*60*1000
+        const expiredtime = Date.now()+__expiredtime*60*60*1000
         this.BanManager.ban(playername,reason,author,expiredtime)
 
         if (this.PlayerStore.players.has(playername)) {

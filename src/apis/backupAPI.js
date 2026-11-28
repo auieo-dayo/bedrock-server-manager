@@ -22,9 +22,10 @@ class BackupAPI {
 
     /**
      * 
-     * @param {boolean} fullBackup 
+     * @param {boolean|undefined} fullBackup
+     * @param {string|undefined} reason  
      */
-    backup(fullBackup=false) {
+    backup(fullBackup=false,reason) {
         const jobID = this.JobManager.addJob("Backup");
         (async()=> {
             try {

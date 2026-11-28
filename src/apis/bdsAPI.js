@@ -22,16 +22,16 @@ class bdsAPI {
     }
 
     forceRestart() {
-      bds.bds.once("close",()=>{
+      this.BDSManager.bds.once("close",()=>{
         bds.restart()
       })
-      bds.forceExit("SIGKILL")
+      this.BDSManager.forceExit("SIGKILL")
     }
 
     async CheckUpdate() {
         const result = {updatable:false,version:this.BDSManager.BDSver,latestVersion:null}
-        const latestVersionList = await fetchBDS.getLatestVersion()
-        const latestVersion = latestVersionList[fetchBDS.getRunningOS()][`${this.configManager.update.Minecraft.isPreview?"Preview":"Release"}`].version
+        const latestVersionList = await this.fetchBDS.getLatestVersion()
+        const latestVersion = latestVersionList[this.fetchBDS.getRunningOS()][`${this.configManager.update.Minecraft.isPreview?"Preview":"Release"}`].version
         result.latestVersion = latestVersion
         if (this.BDSManager.BDSver !== latestVersion) {
             result.updatable = true
@@ -45,9 +45,10 @@ class bdsAPI {
         (async()=>{
             if (this.fetchBDS.updating) {
                 this.JobManager.endJob(jobID,false,{version:this.BDSManager.BDSver},"update is already in progress.")
+                return
             }
-            const latestVersionList = await fetchBDS.getLatestVersion()
-            const latestVersion = latestVersionList[fetchBDS.getRunningOS()][`${this.configManager.update.Minecraft.isPreview?"Preview":"Release"}`].version;
+            const latestVersionList = await this.fetchBDS.getLatestVersion()
+            const latestVersion = latestVersionList[this.fetchBDS.getRunningOS()][`${this.configManager.update.Minecraft.isPreview?"Preview":"Release"}`].version;
             this.JobManager.middleJob(jobID,false,"FetchedVersionList")
             
             if (latestVersion === this.BDSManager.BDSver) {
@@ -61,7 +62,7 @@ class bdsAPI {
                 this.JobManager.middleJob(jobID,false,"Fetch and Extracting BDS")
                 
                 this.BDSManager.off("close",onClose)
-                await fetchBDS.fetchBDS(this.configManager.update.Minecraft.isPreview,this.fetchBDS.getRunningOS(),await this.fetchBDS.getLatestVersion())
+                await this.fetchBDS(this.configManager.update.Minecraft.isPreview,this.fetchBDS.getRunningOS(),await this.fetchBDS.getLatestVersion())
                 
                 this.JobManager.middleJob(jobID,false,"Init BDS")
                 await this.utils.syncEnv()

@@ -38,7 +38,7 @@ class jobManager {
         const job = this.jobs.get(jobid)
         if (!job) return undefined;
         this.jobs.set(jobid,{...job,ended:false,isfailed,message,updateAt:Date.now()})
-        this.emit("middleJob",jobid,isfailed,message)
+        this.emit("middleJob",jobid,isfailed,{},message)
         return job
     }
     /**

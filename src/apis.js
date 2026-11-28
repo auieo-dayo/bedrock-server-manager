@@ -52,7 +52,6 @@ class API {
      * @param {number} __limit 
      */
     getLog(__limit=250) {
-        PlayerStore.prototype
         const limit = Number(__limit)
         // まずタイプ取得
         const logTypes = Object.keys(LoggerType.events)
@@ -77,12 +76,10 @@ class API {
                     result.isDiscord = metadata.isdiscord
                     break;
                 }
-                // プレイヤー入退室
-                case LoggerType.events.PlayerJoin || LoggerType.events.PlayerLeave : {
-                    if (value.type === LoggerType.events.PlayerLeave) {
-                        result.location = metadata.location
-                        result.dimension = metadata.dimension
-                    }
+                // プレイヤー退室
+                case LoggerType.events.PlayerLeave : {
+                    result.location = metadata.location
+                    result.dimension = metadata.dimension
                     break;
                 }
                 // 死亡ログ
@@ -113,16 +110,16 @@ class API {
         const json = JSON.stringify({"type":"getplayerinfo",playername,jobID}).replaceAll("\"","'").replaceAll("\\","\\\\'")
         
         this.BDSManager.sendCommand(`send "${json}"`,true)
+        const onEndJob = (jobid,__isfailed,result)=>{
+            if (jobID !== jobid) return;
+            clearTimeout(id)
+            resolve(result);
+        }
         /**@type {{type:string,playername:string,iserr:boolean,data:{dimension:string,location:{x:number,y:number,z:number},hp:{now:number,max:number},gamemode:string,mainhand:string},jobID:string}} */
         const result = await new Promise((resolve,reject)=>{
             const id = setTimeout(()=>{
                 reject(new Error("Get PlayerInfo Timeout."))
             },1000*15)
-            const onEndJob = (jobid,__isfailed,result)=>{
-                if (jobID !== jobid) return;
-                clearTimeout(id)
-                resolve(result);
-            }
             this.JobManager.on("endJob",onEndJob)
         })
         this.JobManager.off("endJob",onEndJob)
@@ -154,7 +151,7 @@ class API {
         if (!playername || !Number.isSafeInteger(limit) || limit <= -1) throw new Error("PlayerDeathInfo API Validation Error");
         // time,type,player,message,metadata
         /**@type {{time:number,type:number,player:string,message:string,metadata:string}[]} */
-        const res = logger.db.prepare(`SELECT * FROM events WHERE type = ${LoggerType.events.death} AND player = ? ORDER BY time DESC LIMIT ?`).all(playername,((Number(limit) >= 1) ? Number(limit) : 250))
+        const res = this.LogManager.db.prepare(`SELECT * FROM events WHERE type = ${LoggerType.events.death} AND player = ? ORDER BY time DESC LIMIT ?`).all(playername,((Number(limit) >= 1) ? Number(limit) : 250))
         const organizedContent = res.map((value)=>{
             /**@type {{reason:string,dimension:string,location:{x:number,y:number,z:number}}}*/
             const metadata = JSON.parse(value.metadata)
@@ -244,7 +241,7 @@ class API {
         params.push(limit)
 
         /**@type {{time:number,actionType:number,player:string,typeid:string,dimension:string,x:number,y:number,z:number}[]|undefined[]} */
-        const result = this.LogManager.db.prepare(SQL).all(params)
+        const result = this.LogManager.db.prepare(SQL).all(...params)
         return result
     }
 

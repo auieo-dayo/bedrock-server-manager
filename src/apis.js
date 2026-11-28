@@ -42,9 +42,9 @@ class API {
         this.fetchBDS = fetchBDS
 
         this.ban = new BanAPI(BanManager,this.BDSManager,this.PlayerStore)
-        this.backup = new BackupAPI(BackupManager,this.JobManager)
+        this.backup = new BackupAPI(BackupManager,this.JobManager,this.BDSManager,this.PlayerStore)
         this.db = new DBAPI(this.LogManager)
-        this.BDS = new BDSAPI(this.BDSManager,this.configManager,this.JobManager,utils)
+        this.BDS = new BDSAPI(this.BDSManager,this.configManager,this.JobManager,this.fetchBDS,utils)
     }
 
     /**

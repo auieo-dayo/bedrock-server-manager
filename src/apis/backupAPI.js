@@ -1,5 +1,5 @@
 /**@import JobManager from "../jobManagaer.js" */
-/**@import BDS from "../BDS.js" */
+/**@import BDSManager from "../BDS.js" */
 /**@import PlayerStore from "../playerList.js" */
 /**@import BackupManager from "../backup.js" */
 
@@ -11,12 +11,12 @@ class BackupAPI {
      * @param {BackupManager} BackupManager 
      * @param {JobManager} JobManager
      * @param {PlayerStore} PlayerStore
-     * @param {BDS} BDS 
+     * @param {BDSManager} BDSManager 
      */
-    constructor(BackupManager,JobManager,BDS,PlayerStore) {
+    constructor(BackupManager,JobManager,BDSManager,PlayerStore) {
         this.BackupManager = BackupManager
         this.JobManager = JobManager
-        this.BDS = BDS
+        this.BDSManager = BDSManager
         this.PlayerStore = PlayerStore
     }
 
@@ -28,9 +28,9 @@ class BackupAPI {
         const jobID = this.JobManager.addJob("Backup");
         (async()=> {
             try {
-                const list = await this.BackupManager.waitForPreparationsComplete(this.BDS)
+                const list = await this.BackupManager.waitForPreparationsComplete(this.BDSManager)
                 this.JobManager.middleJob(jobID,false,"PreparationsComplete")
-                await this.BackupManager.backup(list,fullBackup,true,this.PlayerStore,this.BDS,reason ? reason : "fromAPI")
+                await this.BackupManager.backup(list,fullBackup,true,this.PlayerStore,this.BDSManager,reason ? reason : "fromAPI")
                 this.JobManager.endJob(jobID,false,{fullBackup,reason:reason?reason:"fromAPI"})
             } catch(e) {
                 this.JobManager.endJob(jobID,true,e)
